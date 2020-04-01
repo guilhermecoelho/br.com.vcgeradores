@@ -1,17 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pdf;
 import 'package:printing/printing.dart';
 import 'package:vc_geradores/src/sidebar.dart';
 
+
 class CreateBudget extends StatelessWidget {
   final orcamentoText = TextEditingController();
   final nomeClienteText = TextEditingController();
-  final enderecoClienteText = TextEditingController();
+  //final enderecoClienteText = TextEditingController();
   final cidadeClienteText = TextEditingController();
-  final estadoClienteText = TextEditingController();
+  //final estadoClienteText = TextEditingController();
   final telefoneClienteText = TextEditingController();
   final emailClienteText = TextEditingController();
+
+  //descrição gerador
+  final geradorKvaText = TextEditingController();
+  final geradorValueText = TextEditingController();
+  final geradorOperatorValueText = TextEditingController();
+
+  //dados evento
+  final eventoLocalText = TextEditingController();
+  final eventoHoraAdicionalText = TextEditingController();
+
+  //forma de pagamento
+  final formaPagamentoTextValue = TextEditingController();
+
+  double totalValue(String firstValue, String secondValue) {
+    var first = double.tryParse(firstValue);
+    var second = double.tryParse(secondValue);
+
+    return (first + second);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +47,11 @@ class CreateBudget extends StatelessWidget {
               tooltip: 'Imprimir',
               onPressed: () {
                 Printing.layoutPdf(
-                  onLayout: buildPdf,
+                  onLayout: (PdfPageFormat format) async =>
+                      await Printing.convertHtml(
+                    format: format,
+                    html: await buildHTML(),
+                  ),
                 );
               },
             ),
@@ -35,6 +60,7 @@ class CreateBudget extends StatelessWidget {
                   child: Form(
                       child: Column(
                 children: <Widget>[
+                  //dados cliente
                   TextFormField(
                     decoration:
                         const InputDecoration(labelText: "Código Orçamento"),
@@ -47,18 +73,8 @@ class CreateBudget extends StatelessWidget {
                   ),
                   TextFormField(
                     decoration:
-                        const InputDecoration(labelText: "Endereço Cliente"),
-                    controller: enderecoClienteText,
-                  ),
-                  TextFormField(
-                    decoration:
                         const InputDecoration(labelText: "Cidade Cliente"),
                     controller: cidadeClienteText,
-                  ),
-                  TextFormField(
-                    decoration:
-                        const InputDecoration(labelText: "Estado Cliente"),
-                    controller: estadoClienteText,
                   ),
                   TextFormField(
                     decoration:
@@ -69,10 +85,65 @@ class CreateBudget extends StatelessWidget {
                     decoration:
                         const InputDecoration(labelText: "Email Cliente"),
                     controller: emailClienteText,
-                  )
+                  ),
+
+                  //descrição gerador
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: "KVA gerador"),
+                    controller: geradorKvaText,
+                  ),
+                  TextFormField(
+                    decoration:
+                        const InputDecoration(labelText: "Valor gerador"),
+                    controller: geradorValueText,
+                  ),
+                  TextFormField(
+                    decoration:
+                        const InputDecoration(labelText: "Valor operador"),
+                    controller: geradorOperatorValueText,
+                  ),
+
+                  //dados evento
+                  TextFormField(
+                    decoration:
+                        const InputDecoration(labelText: "Local evento"),
+                    controller: eventoLocalText,
+                  ),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                        labelText: "Valor hora adicional"),
+                    controller: eventoHoraAdicionalText,
+                  ),
+                  //forma pagamento
+                  TextFormField(
+                    decoration:
+                        const InputDecoration(labelText: "Forma de pagamento"),
+                    controller: formaPagamentoTextValue,
+                  ),
                 ],
               ))),
             )));
+  }
+
+
+
+Future<String> loadAsset() async {
+  return await rootBundle.loadString('assets/html/teste.html');
+}
+
+  Future<String> buildHTML() async {
+    try {
+      var file =  await rootBundle.loadString('assets/html/budget.html');
+
+      // Read the file.
+      file = file.replaceFirst('orcamentoText', orcamentoText.text);
+
+      // return contents;
+      return file;
+    } catch (e) {
+      // If encountering an error, return 0.
+      return 'error';
+    }
   }
 
   List<int> buildPdf(PdfPageFormat format) {
@@ -98,12 +169,7 @@ class CreateBudget extends StatelessWidget {
                     <String>['Dados do Cliente']
                   ]),
               pdf.Paragraph(text: 'Nome ' + nomeClienteText.text),
-              pdf.Paragraph(text: 'Endereço ' + enderecoClienteText.text),
-              pdf.Paragraph(
-                  text: 'Cidade ' +
-                      cidadeClienteText.text +
-                      ' Estado ' +
-                      estadoClienteText.text),
+              pdf.Paragraph(text: 'Cidade ' + cidadeClienteText.text),
               pdf.Paragraph(text: 'Telefone ' + telefoneClienteText.text),
               pdf.Paragraph(text: 'E-mail ' + emailClienteText.text),
               //Equipaments
