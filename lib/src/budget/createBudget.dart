@@ -7,6 +7,8 @@ import 'package:printing/printing.dart';
 import 'package:vc_geradores/src/models/budgetModel.dart';
 import 'package:vc_geradores/src/sidebar.dart';
 
+import '../models/budgetModel.dart';
+
 class CreateBudget extends StatefulWidget {
   @override
   _CreateBudget createState() => _CreateBudget();
@@ -109,6 +111,7 @@ class _CreateBudget extends State<CreateBudget> {
                     firstDate: DateTime(1900),
                     lastDate: DateTime(2100));
               },
+              
               controller: eventoDataInicio,
             ),
             TextFormField(
@@ -246,9 +249,13 @@ class _CreateBudget extends State<CreateBudget> {
       var file = await rootBundle.loadString('assets/html/budget.html');
 
       //dados cliente.
-      DateTime codeBudget = DateTime.parse(eventoDataInicio.text);
+      String codeBudget = '';
+      if(eventoDataInicio.text != null){
+        var eventDateSplit = eventoDataInicio.text.split('/');
+        codeBudget = eventDateSplit[2] + eventDateSplit[1] + eventDateSplit[0];
+      }
 
-      file = file.replaceFirst('orcamentoText', new DateFormat("yyyyMMdd").format(codeBudget));
+      file = file.replaceFirst('orcamentoText', codeBudget);
       file = file.replaceFirst('nomeClienteText', nomeClienteText.text);
       file = file.replaceFirst('cidadeClienteText', cidadeClienteText.text);
       file = file.replaceFirst('telefoneClienteText', telefoneClienteText.text);
