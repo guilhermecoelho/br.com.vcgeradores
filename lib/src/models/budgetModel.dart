@@ -1,10 +1,12 @@
 class BudgetModel {
+
+  final int id;
   String budgetCode = '';
   String budgetTotalValue = '';
   String budgetDate = '';
 
   //client
-  String clientName = '';
+  final String clientName;
   String clientCity = '';
   String clientPhone = '';
   String clientEmail = '';
@@ -22,4 +24,10 @@ class BudgetModel {
 
   //payment
   String paymentType = '';
+
+  BudgetModel({this.id, this.clientName});
+
+  Map<String, dynamic> toMap() {
+    return {'id': id, 'clientName': clientName};
+  }
 }

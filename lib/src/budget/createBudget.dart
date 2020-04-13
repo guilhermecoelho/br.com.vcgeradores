@@ -4,10 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
-import 'package:vc_geradores/src/models/budgetModel.dart';
 import 'package:vc_geradores/src/sidebar.dart';
 
-import '../models/budgetModel.dart';
 
 class CreateBudget extends StatefulWidget {
   @override
@@ -15,7 +13,6 @@ class CreateBudget extends StatefulWidget {
 }
 
 class _CreateBudget extends State<CreateBudget> {
-
   final orcamentoText = TextEditingController();
   final nomeClienteText = TextEditingController();
   final cidadeClienteText = TextEditingController();
@@ -34,8 +31,6 @@ class _CreateBudget extends State<CreateBudget> {
 
   //forma de pagamento
   final formaPagamentoTextValue = TextEditingController();
-
-  static BudgetModel data = new BudgetModel();
 
   bool completed = false;
   int _currentStep = 0;
@@ -93,6 +88,7 @@ class _CreateBudget extends State<CreateBudget> {
             )));
   }
 
+//form steps
   List<Step> _getSteps(BuildContext context) {
     spr = [
       Step(
@@ -111,7 +107,6 @@ class _CreateBudget extends State<CreateBudget> {
                     firstDate: DateTime(1900),
                     lastDate: DateTime(2100));
               },
-              
               controller: eventoDataInicio,
             ),
             TextFormField(
@@ -192,6 +187,7 @@ class _CreateBudget extends State<CreateBudget> {
     return spr;
   }
 
+
   StepState _getState(int i) {
     if (_currentStep == i)
       return StepState.editing;
@@ -250,7 +246,7 @@ class _CreateBudget extends State<CreateBudget> {
 
       //dados cliente.
       String codeBudget = '';
-      if(eventoDataInicio.text != null){
+      if (eventoDataInicio.text != null) {
         var eventDateSplit = eventoDataInicio.text.split('/');
         codeBudget = eventDateSplit[2] + eventDateSplit[1] + eventDateSplit[0];
       }
@@ -282,11 +278,14 @@ class _CreateBudget extends State<CreateBudget> {
           'formaPagamentoTextValue', formaPagamentoTextValue.text);
 
       // validade orçamento
-        file = file.replaceFirst(
-          'dataLimiteOrcamento', new DateFormat.yMMMMd("pt_BR").format(DateTime.now().add(new Duration(days: 15))).toUpperCase());
-
       file = file.replaceFirst(
-          'dataOrcamento', new DateFormat.yMMMMd("pt_BR").format(DateTime.now()));
+          'dataLimiteOrcamento',
+          new DateFormat.yMMMMd("pt_BR")
+              .format(DateTime.now().add(new Duration(days: 15)))
+              .toUpperCase());
+
+      file = file.replaceFirst('dataOrcamento',
+          new DateFormat.yMMMMd("pt_BR").format(DateTime.now()));
       return file;
     } catch (e) {
       // If encountering an error, return 0.
