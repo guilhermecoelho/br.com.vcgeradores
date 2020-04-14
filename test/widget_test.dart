@@ -7,7 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vc_geradores/src/budget/createBudget.dart';
+import 'package:vc_geradores/src/views/budget/createBudget.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
