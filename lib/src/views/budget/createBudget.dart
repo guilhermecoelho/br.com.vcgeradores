@@ -2,17 +2,29 @@ import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:pdf/pdf.dart';
-import 'package:printing/printing.dart';
-import 'package:vc_geradores/src/sidebar.dart';
+import 'package:vc_geradores/src/connections/budgetDao.dart';
+import 'package:vc_geradores/src/views/budget/helperBudget.dart';
 
+import '../../models/budgetModel.dart';
 
 class CreateBudget extends StatefulWidget {
+  final String budgetId;
+  const CreateBudget(this.budgetId);
+
   @override
   _CreateBudget createState() => _CreateBudget();
 }
 
+List<GlobalKey<FormState>> formKeys = [
+  GlobalKey<FormState>(),
+  GlobalKey<FormState>(),
+  GlobalKey<FormState>(),
+  GlobalKey<FormState>()
+];
+
 class _CreateBudget extends State<CreateBudget> {
+  BudgetModel budgetModel = BudgetModel();
+
   final orcamentoText = TextEditingController();
   final nomeClienteText = TextEditingController();
   final cidadeClienteText = TextEditingController();
@@ -37,12 +49,18 @@ class _CreateBudget extends State<CreateBudget> {
   List<Step> spr = <Step>[];
 
   Widget build(BuildContext context) {
+    _getBudget();
     return MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: Scaffold(
             appBar: AppBar(
               title: const Text('Orçamentos'),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context, false),
+              ),
             ),
-            drawer: SideBar(),
+            //drawer: SideBar(),
             body: Column(
               children: <Widget>[
                 !completed
@@ -77,15 +95,68 @@ class _CreateBudget extends State<CreateBudget> {
                             onStepCancel: _moveToLast,
                             steps: _getSteps(context)),
                       )
-                    : Printing.layoutPdf(
-                        onLayout: (PdfPageFormat format) async =>
-                            await Printing.convertHtml(
-                          format: format,
-                          html: await buildHTML(),
-                        ),
-                      )
+                    : Expanded(
+                        child: Center(
+                            child: AlertDialog(
+                        title: Text('Orçamento Salvo'),
+                        content: Text('Deseja imprimir agora?'),
+                        actions: <Widget>[
+                          FlatButton(
+                              onPressed: () => printPdf(this.budgetModel),
+                              child: Text('Imprimir')),
+                          FlatButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text('Finalizar')),
+                        ],
+                      ))),
               ],
             )));
+  }
+
+  Future<void> _getBudget() async {
+    BudgetModel oldbudgetModel = BudgetModel();
+
+    if (widget.budgetId != null) {
+      oldbudgetModel = await getBudgetById(int.parse(widget.budgetId));
+
+      if (oldbudgetModel != null) {
+        nomeClienteText.text = this.budgetModel.clientName != null
+            ? this.budgetModel.clientName
+            : oldbudgetModel.clientName;
+        cidadeClienteText.text = this.budgetModel.clientCity != null
+            ? this.budgetModel.clientCity
+            : oldbudgetModel.clientCity;
+        emailClienteText.text = this.budgetModel.clientEmail != null
+            ? this.budgetModel.clientEmail
+            : oldbudgetModel.clientEmail;
+        telefoneClienteText.text = this.budgetModel.clientPhone != null
+            ? this.budgetModel.clientPhone
+            : oldbudgetModel.clientPhone;
+        geradorKvaText.text = this.budgetModel.generatorKva != null
+            ? this.budgetModel.generatorKva
+            : oldbudgetModel.generatorKva;
+        geradorValueText.text = this.budgetModel.generatorValue != null
+            ? this.budgetModel.generatorValue
+            : oldbudgetModel.generatorValue;
+        geradorOperatorValueText.text =
+            this.budgetModel.generatorOperatorValue != null
+                ? this.budgetModel.generatorOperatorValue
+                : oldbudgetModel.generatorOperatorValue;
+        eventoLocalText.text = this.budgetModel.eventLocal != null
+            ? this.budgetModel.eventLocal
+            : oldbudgetModel.eventLocal;
+        eventoHoraAdicionalText.text =
+            this.budgetModel.eventAdditionalhour != null
+                ? this.budgetModel.eventAdditionalhour
+                : oldbudgetModel.eventAdditionalhour;
+        eventoDataInicio.text = this.budgetModel.eventDateStart != null
+            ? this.budgetModel.eventDateStart
+            : oldbudgetModel.eventDateStart;
+        formaPagamentoTextValue.text = this.budgetModel.paymentType != null
+            ? this.budgetModel.paymentType
+            : oldbudgetModel.paymentType;
+      }
+    }
   }
 
 //form steps
@@ -96,97 +167,190 @@ class _CreateBudget extends State<CreateBudget> {
           isActive: _getStateActive(0),
           state: _getState(0),
           content: Form(
+              key: formKeys[0],
+              autovalidate: true,
               child: Column(children: <Widget>[
-            DateTimeField(
-              format: DateFormat("dd/MM/yyyy"),
-              decoration: const InputDecoration(labelText: "Data do Evento"),
-              onShowPicker: (context, currentValue) {
-                return showDatePicker(
-                    context: context,
-                    initialDate: currentValue ?? DateTime.now(),
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime(2100));
-              },
-              controller: eventoDataInicio,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: "Local evento"),
-              controller: eventoLocalText,
-            ),
-          ]))),
+                DateTimeField(
+                    format: DateFormat("dd/MM/yyyy"),
+                    decoration:
+                        const InputDecoration(labelText: "Data do Evento"),
+                    onShowPicker: (context, currentValue) {
+                      return showDatePicker(
+                          context: context,
+                          initialDate: currentValue ?? DateTime.now(),
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime(2100));
+                    },
+                    controller: eventoDataInicio,
+                    onChanged: (text) {
+                      this.budgetModel.eventDateStart =
+                          DateFormat("dd/MM/yyyy").format(text);
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Selecione uma data';
+                      }
+                    }),
+                TextFormField(
+                    decoration:
+                        const InputDecoration(labelText: "Local evento"),
+                    controller: eventoLocalText,
+                    onChanged: (text) {
+                      this.budgetModel.eventLocal = text.toString();
+                    },
+                    validator: (value) {
+                      if (value.isEmpty || value.length < 1) {
+                        return 'Preencha o local do evento';
+                      }
+                    }),
+              ]))),
       Step(
           title: Text("Cliente"),
           isActive: _getStateActive(1),
           state: _getState(1),
           content: Form(
+              key: formKeys[1],
+              autovalidate: true,
               child: Column(
-            children: <Widget>[
-              TextFormField(
-                decoration: const InputDecoration(labelText: "Nome Cliente"),
-                controller: nomeClienteText,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: "Cidade Cliente"),
-                controller: cidadeClienteText,
-              ),
-              TextFormField(
-                decoration:
-                    const InputDecoration(labelText: "Telefone Cliente"),
-                keyboardType: TextInputType.phone,
-                controller: telefoneClienteText,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: "Email Cliente"),
-                keyboardType: TextInputType.emailAddress,
-                controller: emailClienteText,
-              ),
-            ],
-          ))),
+                children: <Widget>[
+                  TextFormField(
+                    decoration:
+                        const InputDecoration(labelText: "Nome Cliente"),
+                    controller: nomeClienteText,
+                    onChanged: (text) {
+                      this.budgetModel.clientName = text;
+                    },
+                    validator: (value) {
+                      if (value.isEmpty || value.length < 1) {
+                        return 'Preencha o nome do cliente';
+                      }
+                    },
+                  ),
+                  TextFormField(
+                      decoration:
+                          const InputDecoration(labelText: "Cidade Cliente"),
+                      controller: cidadeClienteText,
+                      onChanged: (text) {
+                        this.budgetModel.clientCity = text;
+                      },
+                      validator: (value) {
+                      if (value.isEmpty || value.length < 1) {
+                        return 'Preencha a cidade do cliente';
+                      }
+                    }),
+                  TextFormField(
+                      decoration:
+                          const InputDecoration(labelText: "Telefone Cliente"),
+                      keyboardType: TextInputType.phone,
+                      controller: telefoneClienteText,
+                      onChanged: (text) {
+                        this.budgetModel.clientPhone = text;
+                      },
+                      validator: (value) {
+                      if (value.isEmpty || value.length < 1) {
+                        return 'Preencha o telefone do cliente';
+                      }
+                    }),
+                  TextFormField(
+                      decoration:
+                          const InputDecoration(labelText: "Email Cliente"),
+                      keyboardType: TextInputType.emailAddress,
+                      controller: emailClienteText,
+                      onChanged: (text) {
+                        this.budgetModel.clientEmail = text;
+                      },
+                      validator: (value) {
+                      if (value.isEmpty || value.length < 1) {
+                        return 'Preencha o email do cliente';
+                      }
+                    }),
+                ],
+              ))),
       Step(
           title: Text("Gerador"),
           isActive: _getStateActive(2),
           state: _getState(2),
           content: Form(
+              key: formKeys[2],
+              autovalidate: true,
               child: Column(children: <Widget>[
-            TextFormField(
-              decoration: const InputDecoration(labelText: "KVA gerador"),
-              keyboardType: TextInputType.number,
-              controller: geradorKvaText,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: "Preço do gerador"),
-              keyboardType: TextInputType.number,
-              controller: geradorValueText,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: "Preço do operador"),
-              keyboardType: TextInputType.number,
-              controller: geradorOperatorValueText,
-            ),
-            TextFormField(
-              decoration:
-                  const InputDecoration(labelText: "Valor hora adicional"),
-              keyboardType: TextInputType.number,
-              controller: eventoHoraAdicionalText,
-            ),
-          ]))),
+                TextFormField(
+                    decoration: const InputDecoration(labelText: "KVA gerador"),
+                    keyboardType: TextInputType.number,
+                    controller: geradorKvaText,
+                    onChanged: (text) {
+                      this.budgetModel.generatorKva = text;
+                    },
+                    validator: (value) {
+                      if (value.isEmpty || value.length < 1) {
+                        return 'Preencha o valor KVA do gerador';
+                      }
+                    }),
+                TextFormField(
+                    decoration:
+                        const InputDecoration(labelText: "Preço do gerador"),
+                    keyboardType: TextInputType.number,
+                    controller: geradorValueText,
+                    onChanged: (text) {
+                      this.budgetModel.generatorValue = text;
+                    },
+                    validator: (value) {
+                      if (value.isEmpty || value.length < 1) {
+                        return 'Preencha o preço do gerador';
+                      }
+                    }),
+                TextFormField(
+                    decoration:
+                        const InputDecoration(labelText: "Preço do operador"),
+                    keyboardType: TextInputType.number,
+                    controller: geradorOperatorValueText,
+                    onChanged: (text) {
+                      this.budgetModel.generatorOperatorValue = text;
+                    },
+                    validator: (value) {
+                      if (value.isEmpty || value.length < 1) {
+                        return 'Preencha o preço do operador';
+                      }
+                    }),
+                TextFormField(
+                    decoration: const InputDecoration(
+                        labelText: "Valor hora adicional"),
+                    keyboardType: TextInputType.number,
+                    controller: eventoHoraAdicionalText,
+                    onChanged: (text) {
+                      this.budgetModel.eventAdditionalhour = text;
+                    },
+                    validator: (value) {
+                      if (value.isEmpty || value.length < 1) {
+                        return 'Preencha o valor da hora adicional';
+                      }
+                    }),
+              ]))),
       Step(
           title: Text("Pagamento"),
           isActive: _getStateActive(3),
           state: _getState(3),
           content: Form(
+              key: formKeys[3],
+              autovalidate: true,
               child: Column(children: <Widget>[
-            TextFormField(
-              decoration:
-                  const InputDecoration(labelText: "Forma de pagamento"),
-              controller: formaPagamentoTextValue,
-            ),
-          ])))
+                TextFormField(
+                    decoration:
+                        const InputDecoration(labelText: "Forma de pagamento"),
+                    controller: formaPagamentoTextValue,
+                    onChanged: (text) {
+                      this.budgetModel.paymentType = text;
+                    },
+                    validator: (value) {
+                      if (value.isEmpty || value.length < 1) {
+                        return 'Preencha a forma de pagamento';
+                      }
+                    }),
+              ])))
     ];
 
     return spr;
   }
-
 
   StepState _getState(int i) {
     if (_currentStep == i)
@@ -206,7 +370,7 @@ class _CreateBudget extends State<CreateBudget> {
 
   Text _buttonText() {
     if (_currentStep == spr.length - 1)
-      return const Text("Imprimir");
+      return const Text("Salvar");
     else
       return const Text("Próximo");
   }
@@ -218,8 +382,13 @@ class _CreateBudget extends State<CreateBudget> {
   void _moveToNext() {
     setState(() {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
-      if (_currentStep + 1 == spr.length) completed = true;
-      if (_currentStep + 1 != spr.length) _currentStep++;
+      if (formKeys[_currentStep].currentState.validate()) {
+        if (_currentStep + 1 == spr.length) {
+          _saveBudget();
+          completed = true;
+        }
+        if (_currentStep + 1 != spr.length) _currentStep++;
+      }
     });
   }
 
@@ -229,67 +398,67 @@ class _CreateBudget extends State<CreateBudget> {
     });
   }
 
-  double totalValue(String firstValue, String secondValue) {
-    var first = double.tryParse(firstValue) == null
-        ? double.minPositive
-        : double.tryParse(firstValue);
-    var second = double.tryParse(secondValue) == null
-        ? double.minPositive
-        : double.tryParse(secondValue);
-
-    return (first + second);
-  }
-
-  Future<String> buildHTML() async {
+  void _saveBudget() async {
     try {
-      var file = await rootBundle.loadString('assets/html/budget.html');
-
-      //dados cliente.
-      String codeBudget = '';
       if (eventoDataInicio.text != null) {
         var eventDateSplit = eventoDataInicio.text.split('/');
-        codeBudget = eventDateSplit[2] + eventDateSplit[1] + eventDateSplit[0];
+        this.budgetModel.budgetCode =
+            eventDateSplit[2] + eventDateSplit[1] + eventDateSplit[0];
       }
+      this.budgetModel.id =
+          widget.budgetId != null ? int.parse(widget.budgetId) : null;
 
-      file = file.replaceFirst('orcamentoText', codeBudget);
-      file = file.replaceFirst('nomeClienteText', nomeClienteText.text);
-      file = file.replaceFirst('cidadeClienteText', cidadeClienteText.text);
-      file = file.replaceFirst('telefoneClienteText', telefoneClienteText.text);
-      file = file.replaceFirst('emailClienteText', emailClienteText.text);
+      if (this.budgetModel.id != null) {
+        this.budgetModel.clientName = nomeClienteText.text != null
+            ? nomeClienteText.text
+            : this.budgetModel.clientName;
+        this.budgetModel.clientCity = cidadeClienteText.text != null
+            ? cidadeClienteText.text
+            : this.budgetModel.clientCity;
 
-      // descrição gerador
-      file = file.replaceFirst('geradorKvaText', geradorKvaText.text);
-      file = file.replaceFirst('geradorValueText', geradorValueText.text);
-      file = file.replaceFirst(
-          'geradorOperatorValueText', geradorOperatorValueText.text);
-      file = file.replaceFirst(
-          'geradorTotalValue',
-          totalValue(geradorOperatorValueText.text, geradorValueText.text)
-              .toString());
+        this.budgetModel.clientEmail = emailClienteText.text != null
+            ? emailClienteText.text
+            : this.budgetModel.clientEmail;
 
-      //dados evento
-      file = file.replaceFirst('eventoLocalText', eventoLocalText.text);
-      file = file.replaceFirst(
-          'eventoHoraAdicionalText', eventoHoraAdicionalText.text);
-      file = file.replaceFirst('eventoDataInicio', eventoDataInicio.text);
+        this.budgetModel.clientPhone = telefoneClienteText.text != null
+            ? telefoneClienteText.text
+            : this.budgetModel.clientPhone;
 
-      //forma pagamento
-      file = file.replaceFirst(
-          'formaPagamentoTextValue', formaPagamentoTextValue.text);
+        this.budgetModel.generatorKva = geradorKvaText.text != null
+            ? geradorKvaText.text
+            : this.budgetModel.generatorKva;
 
-      // validade orçamento
-      file = file.replaceFirst(
-          'dataLimiteOrcamento',
-          new DateFormat.yMMMMd("pt_BR")
-              .format(DateTime.now().add(new Duration(days: 15)))
-              .toUpperCase());
+        this.budgetModel.generatorValue = geradorValueText.text != null
+            ? geradorValueText.text
+            : this.budgetModel.generatorValue;
 
-      file = file.replaceFirst('dataOrcamento',
-          new DateFormat.yMMMMd("pt_BR").format(DateTime.now()));
-      return file;
+        this.budgetModel.generatorOperatorValue =
+            geradorOperatorValueText.text != null
+                ? geradorOperatorValueText.text
+                : this.budgetModel.generatorOperatorValue;
+
+        this.budgetModel.eventLocal = eventoLocalText.text != null
+            ? eventoLocalText.text
+            : this.budgetModel.eventLocal;
+
+        this.budgetModel.eventAdditionalhour =
+            eventoHoraAdicionalText.text != null
+                ? eventoHoraAdicionalText.text
+                : this.budgetModel.eventAdditionalhour;
+
+        this.budgetModel.eventDateStart = eventoDataInicio.text != null
+            ? eventoDataInicio.text
+            : this.budgetModel.eventDateStart;
+
+        this.budgetModel.paymentType = formaPagamentoTextValue.text != null
+            ? formaPagamentoTextValue.text
+            : this.budgetModel.paymentType;
+
+        await updateBudget(this.budgetModel);
+      } else
+        await insertBudget(this.budgetModel);
     } catch (e) {
-      // If encountering an error, return 0.
-      return 'error';
+      throw e;
     }
   }
 }

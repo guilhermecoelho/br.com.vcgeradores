@@ -5,7 +5,6 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-
 class DBProvider {
   DBProvider._();
   static final DBProvider db = DBProvider._();
@@ -28,7 +27,22 @@ initDB() async {
       onCreate: (Database db, int version) async {
     await db.execute("CREATE TABLE Budget ("
         "id INTEGER PRIMARY KEY,"
-        "clientName TEXT"
+        "budgetCode TEXT,"
+        "budgetTotalValue TEXT,"
+        "budgetDate TEXT,"
+        "clientName TEXT,"
+        "clientCity TEXT,"
+        "clientPhone TEXT,"
+        "clientEmail TEXT,"
+        "generatorKva TEXT,"
+        "generatorValue TEXT,"
+        "generatorOperatorValue TEXT,"
+        "generatorTotalValue TEXT,"
+        "eventLocal TEXT,"
+        "eventAdditionalhour TEXT,"
+        "eventDateStart TEXT,"
+        "eventDateEnd TEXT,"
+        "paymentType TEXT"
         ")");
   });
 }

@@ -4,9 +4,9 @@ import 'package:vc_geradores/src/connections/budgetDao.dart';
 import 'package:vc_geradores/src/models/budgetModel.dart';
 import 'package:vc_geradores/src/views/budget/createBudget.dart';
 
-import '../../sidebar.dart';
+import 'helperBudget.dart';
 
-enum PopUpItems { edit, print, sendEmail }
+enum PopUpItems { edit, print, delete, sendEmail }
 
 class ListBudget extends StatefulWidget {
   @override
@@ -27,6 +27,7 @@ class _ListBudget extends State<ListBudget> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: new ListBudgetBody(),
     );
   }
@@ -37,13 +38,13 @@ class _ListBudgetBody extends State<ListBudgetBody> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: AppBar(
-        title: const Text('Listar '),
+        title: const Text('Orçamentos'),
       ),
-      drawer: SideBar(),
+      //drawer: SideBar(),
       floatingActionButton: new FloatingActionButton(
         onPressed: () => Navigator.push(context,
-            new MaterialPageRoute(builder: (context) => CreateBudget())),
-        child: Icon(Icons.navigation),
+            new MaterialPageRoute(builder: (context) => CreateBudget(null))),
+        child: Icon(Icons.add),
       ),
       body: FutureBuilder<List>(
           future: listBudget(),
@@ -55,19 +56,54 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                     itemBuilder: (context, index) {
                       return Card(
                         child: ListTile(
-                          title: Text(snapshot.data[index].clientName),
+                          title: Text(snapshot.data[index].clientName +
+                              ' ' +
+                              snapshot.data[index].eventDateStart),
                           trailing: Row(children: <Widget>[
                             PopupMenuButton(
-                                onSelected: (result) {
-                                  if (result.index == 0) {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                CreateBudget()));
-                                  } else
-                                    _popupDialog(
-                                        context, snapshot.data[index], result);
+                                onSelected: (result) async {
+                                  switch (result.index) {
+                                    case 0:
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  CreateBudget(snapshot
+                                                      .data[index].id
+                                                      .toString())));
+                                      break;
+                                    case 1:
+                                      BudgetModel budgetMode =
+                                          await getBudgetById(
+                                              snapshot.data[index].id);
+                                      printPdf(budgetMode);
+                                      break;
+                                    case 2:
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: Text(
+                                                  "Deseja realmente exlcuir?"),
+                                              actions: <Widget>[
+                                                FlatButton(
+                                                    onPressed: () =>
+                                                        _deleteConfirm(
+                                                            context,
+                                                            snapshot.data[index]
+                                                                .id),
+                                                    child: Text('Sim')),
+                                                FlatButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(context)
+                                                            .pop(),
+                                                    child: Text('Não')),
+                                              ],
+                                            );
+                                          });
+                                      break;
+                                    default:
+                                  }
                                 },
                                 itemBuilder: (BuildContext context) =>
                                     <PopupMenuEntry<PopUpItems>>[
@@ -85,14 +121,26 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                                         ),
                                       ),
                                       const PopupMenuItem<PopUpItems>(
-                                        value: PopUpItems.sendEmail,
+                                        value: PopUpItems.delete,
                                         child: ListTile(
-                                          title: Text('Enviar'),
-                                          trailing: Icon(Icons.email),
+                                          title: Text('Excluir'),
+                                          trailing: Icon(Icons.delete),
                                         ),
-                                      ),
+                                      )
+                                      // const PopupMenuItem<PopUpItems>(
+                                      //   value: PopUpItems.sendEmail,
+                                      //   child: ListTile(
+                                      //     title: Text('Enviar'),
+                                      //     trailing: Icon(Icons.email),
+                                      //   ),
+                                      // ),
                                     ]),
                           ], mainAxisSize: MainAxisSize.min),
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CreateBudget(
+                                      snapshot.data[index].id.toString()))),
                         ),
                       );
                     },
@@ -103,6 +151,14 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                 : Center(child: CircularProgressIndicator());
           }),
     );
+  }
+
+  void _deleteConfirm(BuildContext context, int id) {
+    setState(() {
+      BudgetModel budget = new BudgetModel(id: id);
+      deleteBudget(budget);
+      Navigator.of(context).pop();
+    });
   }
 }
 

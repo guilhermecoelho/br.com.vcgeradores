@@ -2,10 +2,9 @@ import 'package:sqflite/sqflite.dart';
 import 'package:vc_geradores/database/database.dart';
 
 import '../../src/models/budgetModel.dart';
-
+import '../models/budgetModel.dart';
 
 Future<void> insertBudget(BudgetModel budget) async {
-  
   final Database db = await database;
 
   await db.insert(
@@ -20,17 +19,22 @@ Future<List<BudgetModel>> listBudget() async {
 
   final List<Map<String, dynamic>> maps = await db.query('Budget');
 
-  // var t = BudgetModel(clientName: 'client 1', id: 1);
-  // var t2 = BudgetModel(clientName: 'client 2', id: 2);
-
-  // insertBudget(t);
-  // insertBudget(t2);
-
   return List.generate(maps.length, (i) {
-    return BudgetModel(
-      id: maps[i]['id'],
-      clientName: maps[i]['clientName']);
+    return _populateBudgetModel(maps[i]);
   });
+}
+
+Future<BudgetModel> getBudgetById(int id) async {
+  BudgetModel result = new BudgetModel();
+
+  final Database db = await database;
+
+  final List<Map<String, dynamic>> maps =
+      await db.query('Budget', where: 'id = ?', whereArgs: [id]);
+
+  if (maps.length > 0) result = _populateBudgetModel(maps.first);
+
+  return result;
 }
 
 Future<void> updateBudget(BudgetModel budget) async {
@@ -40,10 +44,28 @@ Future<void> updateBudget(BudgetModel budget) async {
       where: 'id = ?', whereArgs: [budget.id]);
 }
 
-
 Future<void> deleteBudget(BudgetModel budget) async {
   final Database db = await database;
 
-  await db.delete('Budget',
-      where: 'id = ?', whereArgs: [budget.id]);
+  await db.delete('Budget', where: 'id = ?', whereArgs: [budget.id]);
+}
+
+BudgetModel _populateBudgetModel(Map<String, dynamic> map) {
+  return BudgetModel(
+      id: map['id'],
+      budgetCode: map['budgetCode'],
+      budgetTotalValue: map['budgetTotalValue'],
+      budgetDate: map['budgetDate'],
+      clientName: map['clientName'],
+      clientCity: map['clientCity'],
+      clientPhone: map['clientPhone'],
+      clientEmail: map['clientEmail'],
+      generatorKva: map['generatorKva'],
+      generatorValue: map['generatorValue'],
+      generatorOperatorValue: map['generatorOperatorValue'],
+      eventLocal: map['eventLocal'],
+      eventAdditionalhour: map['eventAdditionalhour'],
+      eventDateStart: map['eventDateStart'],
+      eventDateEnd: map['eventDateEnd'],
+      paymentType: map['paymentType']);
 }
