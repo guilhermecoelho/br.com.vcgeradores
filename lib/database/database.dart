@@ -52,5 +52,6 @@ initDB() async {
     if (oldVersion < newVersion)
       await db.execute("ALTER TABLE Budget ADD COLUMN eventHoursUsed TEXT;");
       await db.execute("ALTER TABLE Budget ADD COLUMN generatorIsStandBy INTEGER;");
+      await db.execute("UPDATE Budget SET generatorIsStandBy = 1 ");
   });
 }
