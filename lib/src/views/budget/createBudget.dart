@@ -39,6 +39,7 @@ class _CreateBudget extends State<CreateBudget> {
   //dados evento
   final eventoLocalText = TextEditingController();
   final eventoHoraAdicionalText = TextEditingController();
+  final eventoHoraUsoText = TextEditingController();
   final eventoDataInicio = TextEditingController();
 
   //forma de pagamento
@@ -47,6 +48,8 @@ class _CreateBudget extends State<CreateBudget> {
   bool completed = false;
   int _currentStep = 0;
   List<Step> spr = <Step>[];
+
+  bool selectedRadio = true;
 
   Widget build(BuildContext context) {
     _getBudget();
@@ -149,6 +152,9 @@ class _CreateBudget extends State<CreateBudget> {
             this.budgetModel.eventAdditionalhour != null
                 ? this.budgetModel.eventAdditionalhour
                 : oldbudgetModel.eventAdditionalhour;
+        eventoHoraUsoText.text = this.budgetModel.eventHoursUsed != null
+            ? this.budgetModel.eventHoursUsed
+            : oldbudgetModel.eventHoursUsed;
         eventoDataInicio.text = this.budgetModel.eventDateStart != null
             ? this.budgetModel.eventDateStart
             : oldbudgetModel.eventDateStart;
@@ -234,10 +240,10 @@ class _CreateBudget extends State<CreateBudget> {
                         this.budgetModel.clientCity = text;
                       },
                       validator: (value) {
-                      if (value.isEmpty || value.length < 1) {
-                        return 'Preencha a cidade do cliente';
-                      }
-                    }),
+                        if (value.isEmpty || value.length < 1) {
+                          return 'Preencha a cidade do cliente';
+                        }
+                      }),
                   TextFormField(
                       decoration:
                           const InputDecoration(labelText: "Telefone Cliente"),
@@ -247,10 +253,10 @@ class _CreateBudget extends State<CreateBudget> {
                         this.budgetModel.clientPhone = text;
                       },
                       validator: (value) {
-                      if (value.isEmpty || value.length < 1) {
-                        return 'Preencha o telefone do cliente';
-                      }
-                    }),
+                        if (value.isEmpty || value.length < 1) {
+                          return 'Preencha o telefone do cliente';
+                        }
+                      }),
                   TextFormField(
                       decoration:
                           const InputDecoration(labelText: "Email Cliente"),
@@ -260,10 +266,10 @@ class _CreateBudget extends State<CreateBudget> {
                         this.budgetModel.clientEmail = text;
                       },
                       validator: (value) {
-                      if (value.isEmpty || value.length < 1) {
-                        return 'Preencha o email do cliente';
-                      }
-                    }),
+                        if (value.isEmpty || value.length < 1) {
+                          return 'Preencha o email do cliente';
+                        }
+                      }),
                 ],
               ))),
       Step(
@@ -312,19 +318,55 @@ class _CreateBudget extends State<CreateBudget> {
                         return 'Preencha o preço do operador';
                       }
                     }),
-                TextFormField(
-                    decoration: const InputDecoration(
-                        labelText: "Valor hora adicional"),
-                    keyboardType: TextInputType.number,
-                    controller: eventoHoraAdicionalText,
-                    onChanged: (text) {
-                      this.budgetModel.eventAdditionalhour = text;
-                    },
-                    validator: (value) {
-                      if (value.isEmpty || value.length < 1) {
-                        return 'Preencha o valor da hora adicional';
-                      }
-                    }),
+                Row(
+                  children: <Widget>[
+                    Radio(
+                      groupValue: selectedRadio,
+                      value: true,
+                      onChanged: (value) => _changeRadioModeUse(value),
+                    ),
+                    Text(" MODO STAND BY"),
+                    Radio(
+                        groupValue: selectedRadio,
+                        value: false,
+                        onChanged: (value) => _changeRadioModeUse(value)),
+                    Text("MODO USO"),
+                  ],
+                ),
+                Visibility(
+                  visible: selectedRadio,
+                  child: TextFormField(
+                      decoration: const InputDecoration(
+                          labelText: "Valor hora adicional"),
+                      keyboardType: TextInputType.number,
+                      controller: eventoHoraAdicionalText,
+                      onChanged: (text) {
+                        this.budgetModel.eventAdditionalhour = text;
+                      },
+                      validator: (value) {
+                        if (selectedRadio == true &&
+                            (value.isEmpty || value.length < 1)) {
+                          return 'Preencha o valor da hora adicional';
+                        }
+                      }),
+                ),
+                Visibility(
+                  visible: !selectedRadio,
+                  child: TextFormField(
+                      decoration: const InputDecoration(
+                          labelText: "Total de horas de uso"),
+                      keyboardType: TextInputType.number,
+                      controller: eventoHoraUsoText,
+                      onChanged: (text) {
+                        this.budgetModel.eventHoursUsed = text;
+                      },
+                      validator: (value) {
+                        if (selectedRadio == false &&
+                            (value.isEmpty || value.length < 1)) {
+                          return 'Preencha o valor de horas de uso';
+                        }
+                      }),
+                )
               ]))),
       Step(
           title: Text("Pagamento"),
@@ -350,6 +392,13 @@ class _CreateBudget extends State<CreateBudget> {
     ];
 
     return spr;
+  }
+
+  void _changeRadioModeUse(dynamic value) {
+    setState(() => {
+          selectedRadio = value,
+          this.budgetModel.generatorIsStandBy = value ? 1 : 0
+        });
   }
 
   StepState _getState(int i) {
@@ -445,6 +494,10 @@ class _CreateBudget extends State<CreateBudget> {
             eventoHoraAdicionalText.text != null
                 ? eventoHoraAdicionalText.text
                 : this.budgetModel.eventAdditionalhour;
+
+        this.budgetModel.eventHoursUsed = eventoHoraUsoText.text != null
+            ? eventoHoraUsoText.text
+            : this.budgetModel.eventHoursUsed;
 
         this.budgetModel.eventDateStart = eventoDataInicio.text != null
             ? eventoDataInicio.text

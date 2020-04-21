@@ -12,6 +12,8 @@ class DBProvider {
 
 Database _database;
 
+int _version = 2;
+
 Future<Database> get database async {
   if (_database != null) return _database;
 
@@ -23,7 +25,7 @@ Future<Database> get database async {
 initDB() async {
   Directory documentsDirectory = await getApplicationDocumentsDirectory();
   String path = join(documentsDirectory.path, "TestDB.db");
-  return await openDatabase(path, version: 1, onOpen: (db) {},
+  return await openDatabase(path, version: _version, onOpen: (db) {},
       onCreate: (Database db, int version) async {
     await db.execute("CREATE TABLE Budget ("
         "id INTEGER PRIMARY KEY,"
@@ -36,13 +38,19 @@ initDB() async {
         "clientEmail TEXT,"
         "generatorKva TEXT,"
         "generatorValue TEXT,"
+        "generatorIsStandBy INTEGER,"
         "generatorOperatorValue TEXT,"
         "generatorTotalValue TEXT,"
         "eventLocal TEXT,"
         "eventAdditionalhour TEXT,"
+        "eventHoursUsed TEXT,"
         "eventDateStart TEXT,"
         "eventDateEnd TEXT,"
         "paymentType TEXT"
         ")");
+  }, onUpgrade: (Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < newVersion)
+      await db.execute("ALTER TABLE Budget ADD COLUMN eventHoursUsed TEXT;");
+      await db.execute("ALTER TABLE Budget ADD COLUMN generatorIsStandBy INTEGER;");
   });
 }

@@ -4,7 +4,6 @@ import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:vc_geradores/src/models/budgetModel.dart';
 
-
 void printPdf(BudgetModel budgetModel) {
   Printing.layoutPdf(
     onLayout: (PdfPageFormat format) async => await Printing.convertHtml(
@@ -16,7 +15,9 @@ void printPdf(BudgetModel budgetModel) {
 
 Future<String> _buildHTML(BudgetModel budgetModel) async {
   try {
-    var file = await rootBundle.loadString('assets/html/budget.html');
+    String file = budgetModel.generatorIsStandBy == 1
+        ? await rootBundle.loadString('assets/html/budgetStandBy.html')
+        : await rootBundle.loadString('assets/html/budgetModeUse.html');
 
     file = file.replaceFirst('orcamentoText', budgetModel.budgetCode);
     file = file.replaceFirst('nomeClienteText', budgetModel.clientName);
@@ -25,6 +26,9 @@ Future<String> _buildHTML(BudgetModel budgetModel) async {
     file = file.replaceFirst('emailClienteText', budgetModel.clientEmail);
 
     // descrição gerador
+    //geradorModoUsoText
+    file = file.replaceFirst('geradorModoUsoText',
+        budgetModel.generatorIsStandBy == 1 ? "MODO STANDY BY" : "MODO USO");
     file = file.replaceFirst('geradorKvaText', budgetModel.generatorKva);
     file = file.replaceFirst('geradorValueText', budgetModel.generatorValue);
     file = file.replaceFirst(
@@ -37,9 +41,13 @@ Future<String> _buildHTML(BudgetModel budgetModel) async {
 
     //dados evento
     file = file.replaceFirst('eventoLocalText', budgetModel.eventLocal);
-    file = file.replaceFirst(
-        'eventoHoraAdicionalText', budgetModel.eventAdditionalhour);
+    if (budgetModel.generatorIsStandBy == 1)
+      file = file.replaceFirst(
+          'eventoHoraAdicionalText', budgetModel.eventAdditionalhour);
     file = file.replaceFirst('eventoDataInicio', budgetModel.eventDateStart);
+
+    if (budgetModel.generatorIsStandBy == 0)
+      file = file.replaceFirst('eventoHoraUsoText', budgetModel.eventHoursUsed);
 
     //forma pagamento
     file =
@@ -49,7 +57,7 @@ Future<String> _buildHTML(BudgetModel budgetModel) async {
     file = file.replaceFirst(
         'dataLimiteOrcamento',
         new DateFormat.yMMMMd("pt_BR")
-            .format(DateTime.now().add(new Duration(days: 15)))
+            .format(DateTime.now().add(new Duration(days: 30)))
             .toUpperCase());
 
     file = file.replaceFirst(

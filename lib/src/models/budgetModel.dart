@@ -15,10 +15,12 @@ class BudgetModel {
   String generatorValue;
   String generatorOperatorValue;
   String generatorTotalValue;
+  int generatorIsStandBy;
 
   //event
   String eventLocal;
   String eventAdditionalhour;
+  String eventHoursUsed;
   String eventDateStart;
   String eventDateEnd;
 
@@ -38,8 +40,10 @@ class BudgetModel {
       this.generatorValue,
       this.generatorOperatorValue,
       this.generatorTotalValue,
+      this.generatorIsStandBy,
       this.eventLocal,
       this.eventAdditionalhour,
+      this.eventHoursUsed,
       this.eventDateStart,
       this.eventDateEnd,
       this.paymentType});
@@ -58,8 +62,10 @@ class BudgetModel {
       'generatorValue': generatorValue,
       'generatorOperatorValue': generatorOperatorValue,
       'generatorTotalValue': generatorTotalValue,
+      'generatorIsStandBy': generatorIsStandBy,
       'eventLocal': eventLocal,
       'eventAdditionalhour': eventAdditionalhour,
+      'eventHoursUsed': eventHoursUsed,
       'eventDateStart': eventDateStart,
       'eventDateEnd': eventDateEnd,
       'paymentType': paymentType
