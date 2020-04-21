@@ -5,7 +5,7 @@
 
 # Flutter build
 variables:
-  projectDirectory: 'br.com.vcgeradores'
+  projectDirectory: 'guilhermecoelho/br.com.vcgeradores'
 trigger:
 - master
 jobs:
