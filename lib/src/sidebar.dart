@@ -9,7 +9,7 @@ class SideBar extends StatelessWidget {
           decoration: BoxDecoration(color: Colors.blue),
         ),
         ListTile(
-          title: Text('Item 1'),
+          title: Text('Item 2'),
           onTap: () {
             Navigator.pop(context);
           },
