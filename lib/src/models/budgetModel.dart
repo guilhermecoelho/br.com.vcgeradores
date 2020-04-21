@@ -16,6 +16,7 @@ class BudgetModel {
   String generatorOperatorValue;
   String generatorTotalValue;
   int generatorIsStandBy;
+  String generatorObservation;
 
   //event
   String eventLocal;
@@ -41,6 +42,7 @@ class BudgetModel {
       this.generatorOperatorValue,
       this.generatorTotalValue,
       this.generatorIsStandBy,
+      this.generatorObservation,
       this.eventLocal,
       this.eventAdditionalhour,
       this.eventHoursUsed,
@@ -63,6 +65,7 @@ class BudgetModel {
       'generatorOperatorValue': generatorOperatorValue,
       'generatorTotalValue': generatorTotalValue,
       'generatorIsStandBy': generatorIsStandBy,
+      'generatorObservation':generatorObservation,
       'eventLocal': eventLocal,
       'eventAdditionalhour': eventAdditionalhour,
       'eventHoursUsed': eventHoursUsed,

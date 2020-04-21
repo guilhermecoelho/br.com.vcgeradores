@@ -35,6 +35,7 @@ class _CreateBudget extends State<CreateBudget> {
   final geradorKvaText = TextEditingController();
   final geradorValueText = TextEditingController();
   final geradorOperatorValueText = TextEditingController();
+  final generatorObservationText = TextEditingController();
 
   //dados evento
   final eventoLocalText = TextEditingController();
@@ -145,6 +146,10 @@ class _CreateBudget extends State<CreateBudget> {
             this.budgetModel.generatorOperatorValue != null
                 ? this.budgetModel.generatorOperatorValue
                 : oldbudgetModel.generatorOperatorValue;
+        generatorObservationText.text =
+            this.budgetModel.generatorObservation != null
+                ? this.budgetModel.generatorObservation
+                : oldbudgetModel.generatorObservation;
         eventoLocalText.text = this.budgetModel.eventLocal != null
             ? this.budgetModel.eventLocal
             : oldbudgetModel.eventLocal;
@@ -161,6 +166,10 @@ class _CreateBudget extends State<CreateBudget> {
         formaPagamentoTextValue.text = this.budgetModel.paymentType != null
             ? this.budgetModel.paymentType
             : oldbudgetModel.paymentType;
+
+        selectedRadio = this.budgetModel.generatorIsStandBy == null
+            ? (oldbudgetModel.generatorIsStandBy == 1 ? true : false)
+            : selectedRadio;
       }
     }
   }
@@ -366,7 +375,13 @@ class _CreateBudget extends State<CreateBudget> {
                           return 'Preencha o valor de horas de uso';
                         }
                       }),
-                )
+                ),
+                TextFormField(
+                    decoration: const InputDecoration(labelText: "Observações"),
+                    controller: generatorObservationText,
+                    onChanged: (text) {
+                      this.budgetModel.generatorObservation = text;
+                    })
               ]))),
       Step(
           title: Text("Pagamento"),
@@ -486,6 +501,11 @@ class _CreateBudget extends State<CreateBudget> {
                 ? geradorOperatorValueText.text
                 : this.budgetModel.generatorOperatorValue;
 
+        this.budgetModel.generatorObservation =
+            generatorObservationText.text != null
+                ? generatorObservationText.text
+                : this.budgetModel.generatorObservation;
+
         this.budgetModel.eventLocal = eventoLocalText.text != null
             ? eventoLocalText.text
             : this.budgetModel.eventLocal;
@@ -507,9 +527,13 @@ class _CreateBudget extends State<CreateBudget> {
             ? formaPagamentoTextValue.text
             : this.budgetModel.paymentType;
 
+        this.budgetModel.generatorIsStandBy = selectedRadio == true ? 1 : 0;
+
         await updateBudget(this.budgetModel);
-      } else
+      } else {
+        this.budgetModel.generatorIsStandBy = selectedRadio == true ? 1 : 0;
         await insertBudget(this.budgetModel);
+      }
     } catch (e) {
       throw e;
     }

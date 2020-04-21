@@ -12,7 +12,7 @@ class DBProvider {
 
 Database _database;
 
-int _version = 2;
+int _version = 3;
 
 Future<Database> get database async {
   if (_database != null) return _database;
@@ -41,6 +41,7 @@ initDB() async {
         "generatorIsStandBy INTEGER,"
         "generatorOperatorValue TEXT,"
         "generatorTotalValue TEXT,"
+        "generatorObservation TEXT,"
         "eventLocal TEXT,"
         "eventAdditionalhour TEXT,"
         "eventHoursUsed TEXT,"
@@ -49,9 +50,15 @@ initDB() async {
         "paymentType TEXT"
         ")");
   }, onUpgrade: (Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < newVersion)
+    if (newVersion == 2) {
       await db.execute("ALTER TABLE Budget ADD COLUMN eventHoursUsed TEXT;");
-      await db.execute("ALTER TABLE Budget ADD COLUMN generatorIsStandBy INTEGER;");
+      await db
+          .execute("ALTER TABLE Budget ADD COLUMN generatorIsStandBy INTEGER;");
       await db.execute("UPDATE Budget SET generatorIsStandBy = 1 ");
+    }
+    if (newVersion == 3) {
+      await db
+          .execute("ALTER TABLE Budget ADD COLUMN generatorObservation TEXT;");
+    }
   });
 }

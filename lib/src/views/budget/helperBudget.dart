@@ -38,7 +38,13 @@ Future<String> _buildHTML(BudgetModel budgetModel) async {
         _totalValue(
                 budgetModel.generatorOperatorValue, budgetModel.generatorValue)
             .toString());
+    //generatorObservation
 
+    file = file.replaceFirst(
+        'generatorObservationText',
+        budgetModel.generatorObservation != null
+            ? budgetModel.generatorObservation
+            : ' ');
     //dados evento
     file = file.replaceFirst('eventoLocalText', budgetModel.eventLocal);
     if (budgetModel.generatorIsStandBy == 1)
