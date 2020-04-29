@@ -1,3 +1,4 @@
+https://dev.azure.com/guilhermecoelho20374/VC%20geradores/_apis/build/status/guilhermecoelho.br.com.vcgeradores?branchName=master
 # vc_geradores
 
 Flutter project to generate and manage budgets
