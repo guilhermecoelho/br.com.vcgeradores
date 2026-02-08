@@ -1,7 +1,5 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:vc_geradores/database/database.dart';
-
-import '../../src/models/budgetModel.dart';
 import '../models/budgetModel.dart';
 
 Future<void> insertBudget(BudgetModel budget) async {
@@ -24,17 +22,17 @@ Future<List<BudgetModel>> listBudget() async {
   });
 }
 
-Future<BudgetModel> getBudgetById(int id) async {
-  BudgetModel result = new BudgetModel();
-
+Future<BudgetModel?> getBudgetById(int id) async {
   final Database db = await database;
 
   final List<Map<String, dynamic>> maps =
       await db.query('Budget', where: 'id = ?', whereArgs: [id]);
 
-  if (maps.length > 0) result = _populateBudgetModel(maps.first);
+  if (maps.isNotEmpty) {
+    return _populateBudgetModel(maps.first);
+  }
 
-  return result;
+  return null;
 }
 
 Future<void> updateBudget(BudgetModel budget) async {

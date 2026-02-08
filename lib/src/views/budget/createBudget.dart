@@ -1,4 +1,3 @@
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +7,7 @@ import 'package:vc_geradores/src/views/budget/helperBudget.dart';
 import '../../models/budgetModel.dart';
 
 class CreateBudget extends StatefulWidget {
-  final String budgetId;
+  final String? budgetId;
   const CreateBudget(this.budgetId);
 
   @override
@@ -71,25 +70,27 @@ class _CreateBudget extends State<CreateBudget> {
                     ? Expanded(
                         child: Stepper(
                             type: StepperType.vertical,
-                            controlsBuilder: (BuildContext context,
-                                {VoidCallback onStepContinue,
-                                VoidCallback onStepCancel}) {
+                            controlsBuilder: (BuildContext context, ControlsDetails details) {
                               return Row(
                                 children: <Widget>[
                                   SizedBox(height: 100),
                                   if (showBackButton())
-                                    FlatButton(
-                                      onPressed: onStepCancel,
+                                    TextButton(
+                                      onPressed: details.onStepCancel,
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Colors.white,
+                                      ),
                                       child: const Text('Voltar'),
-                                      color: Colors.red,
-                                      textColor: Colors.white,
                                     ),
                                   Spacer(),
-                                  FlatButton(
-                                    onPressed: onStepContinue,
+                                  ElevatedButton(
+                                    onPressed: details.onStepContinue,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue,
+                                      foregroundColor: Colors.white,
+                                    ),
                                     child: _buttonText(),
-                                    color: Colors.blue,
-                                    textColor: Colors.white,
                                   ),
                                 ],
                               );
@@ -105,10 +106,10 @@ class _CreateBudget extends State<CreateBudget> {
                         title: Text('Orçamento Salvo'),
                         content: Text('Deseja imprimir agora?'),
                         actions: <Widget>[
-                          FlatButton(
-                              onPressed: () => printPdf(this.budgetModel),
+                          TextButton(
+                              onPressed: () => printPdf(budgetModel),
                               child: Text('Imprimir')),
-                          FlatButton(
+                          TextButton(
                               onPressed: () => Navigator.of(context).pop(),
                               child: Text('Finalizar')),
                         ],
@@ -118,57 +119,26 @@ class _CreateBudget extends State<CreateBudget> {
   }
 
   Future<void> _getBudget() async {
-    BudgetModel oldbudgetModel = BudgetModel();
-
     if (widget.budgetId != null) {
-      oldbudgetModel = await getBudgetById(int.parse(widget.budgetId));
+      BudgetModel? oldbudgetModel = await getBudgetById(int.parse(widget.budgetId!));
 
       if (oldbudgetModel != null) {
-        nomeClienteText.text = this.budgetModel.clientName != null
-            ? this.budgetModel.clientName
-            : oldbudgetModel.clientName;
-        cidadeClienteText.text = this.budgetModel.clientCity != null
-            ? this.budgetModel.clientCity
-            : oldbudgetModel.clientCity;
-        emailClienteText.text = this.budgetModel.clientEmail != null
-            ? this.budgetModel.clientEmail
-            : oldbudgetModel.clientEmail;
-        telefoneClienteText.text = this.budgetModel.clientPhone != null
-            ? this.budgetModel.clientPhone
-            : oldbudgetModel.clientPhone;
-        geradorKvaText.text = this.budgetModel.generatorKva != null
-            ? this.budgetModel.generatorKva
-            : oldbudgetModel.generatorKva;
-        geradorValueText.text = this.budgetModel.generatorValue != null
-            ? this.budgetModel.generatorValue
-            : oldbudgetModel.generatorValue;
-        geradorOperatorValueText.text =
-            this.budgetModel.generatorOperatorValue != null
-                ? this.budgetModel.generatorOperatorValue
-                : oldbudgetModel.generatorOperatorValue;
-        generatorObservationText.text =
-            this.budgetModel.generatorObservation != null
-                ? this.budgetModel.generatorObservation
-                : oldbudgetModel.generatorObservation;
-        eventoLocalText.text = this.budgetModel.eventLocal != null
-            ? this.budgetModel.eventLocal
-            : oldbudgetModel.eventLocal;
-        eventoHoraAdicionalText.text =
-            this.budgetModel.eventAdditionalhour != null
-                ? this.budgetModel.eventAdditionalhour
-                : oldbudgetModel.eventAdditionalhour;
-        eventoHoraUsoText.text = this.budgetModel.eventHoursUsed != null
-            ? this.budgetModel.eventHoursUsed
-            : oldbudgetModel.eventHoursUsed;
-        eventoDataInicio.text = this.budgetModel.eventDateStart != null
-            ? this.budgetModel.eventDateStart
-            : oldbudgetModel.eventDateStart;
-        formaPagamentoTextValue.text = this.budgetModel.paymentType != null
-            ? this.budgetModel.paymentType
-            : oldbudgetModel.paymentType;
+        nomeClienteText.text = budgetModel.clientName ?? oldbudgetModel.clientName ?? '';
+        cidadeClienteText.text = budgetModel.clientCity ?? oldbudgetModel.clientCity ?? '';
+        emailClienteText.text = budgetModel.clientEmail ?? oldbudgetModel.clientEmail ?? '';
+        telefoneClienteText.text = budgetModel.clientPhone ?? oldbudgetModel.clientPhone ?? '';
+        geradorKvaText.text = budgetModel.generatorKva ?? oldbudgetModel.generatorKva ?? '';
+        geradorValueText.text = budgetModel.generatorValue ?? oldbudgetModel.generatorValue ?? '';
+        geradorOperatorValueText.text = budgetModel.generatorOperatorValue ?? oldbudgetModel.generatorOperatorValue ?? '';
+        generatorObservationText.text = budgetModel.generatorObservation ?? oldbudgetModel.generatorObservation ?? '';
+        eventoLocalText.text = budgetModel.eventLocal ?? oldbudgetModel.eventLocal ?? '';
+        eventoHoraAdicionalText.text = budgetModel.eventAdditionalhour ?? oldbudgetModel.eventAdditionalhour ?? '';
+        eventoHoraUsoText.text = budgetModel.eventHoursUsed ?? oldbudgetModel.eventHoursUsed ?? '';
+        eventoDataInicio.text = budgetModel.eventDateStart ?? oldbudgetModel.eventDateStart ?? '';
+        formaPagamentoTextValue.text = budgetModel.paymentType ?? oldbudgetModel.paymentType ?? '';
 
-        selectedRadio = this.budgetModel.generatorIsStandBy == null
-            ? (oldbudgetModel.generatorIsStandBy == 1 ? true : false)
+        selectedRadio = budgetModel.generatorIsStandBy == null
+            ? (oldbudgetModel.generatorIsStandBy == 1)
             : selectedRadio;
       }
     }
@@ -183,38 +153,40 @@ class _CreateBudget extends State<CreateBudget> {
           state: _getState(0),
           content: Form(
               key: formKeys[0],
-              autovalidate: true,
+              autovalidateMode: AutovalidateMode.always,
               child: Column(children: <Widget>[
-                DateTimeField(
-                    format: DateFormat("dd/MM/yyyy"),
+                TextFormField(
                     decoration:
                         const InputDecoration(labelText: "Data do Evento"),
-                    onShowPicker: (context, currentValue) {
-                      return showDatePicker(
+                    controller: eventoDataInicio,
+                    readOnly: true,
+                    onTap: () async {
+                      DateTime? pickedDate = await showDatePicker(
                           context: context,
-                          initialDate: currentValue ?? DateTime.now(),
+                          initialDate: DateTime.now(),
                           firstDate: DateTime(1900),
                           lastDate: DateTime(2100));
-                    },
-                    controller: eventoDataInicio,
-                    onChanged: (text) {
-                      this.budgetModel.eventDateStart =
-                          DateFormat("dd/MM/yyyy").format(text);
+                      if (pickedDate != null) {
+                        String formattedDate = DateFormat("dd/MM/yyyy").format(pickedDate);
+                        eventoDataInicio.text = formattedDate;
+                        budgetModel.eventDateStart = formattedDate;
+                      }
                     },
                     validator: (value) {
-                      if (value == null) {
+                      if (value == null || value.isEmpty) {
                         return 'Selecione uma data';
                       }
+                      return null;
                     }),
                 TextFormField(
                     decoration:
                         const InputDecoration(labelText: "Local evento"),
                     controller: eventoLocalText,
                     onChanged: (text) {
-                      this.budgetModel.eventLocal = text.toString();
+                      budgetModel.eventLocal = text.toString();
                     },
                     validator: (value) {
-                      if (value.isEmpty || value.length < 1) {
+                      if (value == null || value.isEmpty) {
                         return 'Preencha o local do evento';
                       }
                     }),
@@ -225,7 +197,7 @@ class _CreateBudget extends State<CreateBudget> {
           state: _getState(1),
           content: Form(
               key: formKeys[1],
-              autovalidate: true,
+              autovalidateMode: AutovalidateMode.always,
               child: Column(
                 children: <Widget>[
                   TextFormField(
@@ -233,10 +205,10 @@ class _CreateBudget extends State<CreateBudget> {
                         const InputDecoration(labelText: "Nome Cliente"),
                     controller: nomeClienteText,
                     onChanged: (text) {
-                      this.budgetModel.clientName = text;
+                      budgetModel.clientName = text;
                     },
                     validator: (value) {
-                      if (value.isEmpty || value.length < 1) {
+                      if (value == null || value.isEmpty) {
                         return 'Preencha o nome do cliente';
                       }
                     },
@@ -246,10 +218,10 @@ class _CreateBudget extends State<CreateBudget> {
                           const InputDecoration(labelText: "Cidade Cliente"),
                       controller: cidadeClienteText,
                       onChanged: (text) {
-                        this.budgetModel.clientCity = text;
+                        budgetModel.clientCity = text;
                       },
                       validator: (value) {
-                        if (value.isEmpty || value.length < 1) {
+                        if (value == null || value.isEmpty) {
                           return 'Preencha a cidade do cliente';
                         }
                       }),
@@ -259,10 +231,10 @@ class _CreateBudget extends State<CreateBudget> {
                       keyboardType: TextInputType.phone,
                       controller: telefoneClienteText,
                       onChanged: (text) {
-                        this.budgetModel.clientPhone = text;
+                        budgetModel.clientPhone = text;
                       },
                       validator: (value) {
-                        if (value.isEmpty || value.length < 1) {
+                        if (value == null || value.isEmpty) {
                           return 'Preencha o telefone do cliente';
                         }
                       }),
@@ -272,10 +244,10 @@ class _CreateBudget extends State<CreateBudget> {
                       keyboardType: TextInputType.emailAddress,
                       controller: emailClienteText,
                       onChanged: (text) {
-                        this.budgetModel.clientEmail = text;
+                        budgetModel.clientEmail = text;
                       },
                       validator: (value) {
-                        if (value.isEmpty || value.length < 1) {
+                        if (value == null || value.isEmpty) {
                           return 'Preencha o email do cliente';
                         }
                       }),
@@ -287,17 +259,17 @@ class _CreateBudget extends State<CreateBudget> {
           state: _getState(2),
           content: Form(
               key: formKeys[2],
-              autovalidate: true,
+              autovalidateMode: AutovalidateMode.always,
               child: Column(children: <Widget>[
                 TextFormField(
                     decoration: const InputDecoration(labelText: "KVA gerador"),
                     keyboardType: TextInputType.number,
                     controller: geradorKvaText,
                     onChanged: (text) {
-                      this.budgetModel.generatorKva = text;
+                      budgetModel.generatorKva = text;
                     },
                     validator: (value) {
-                      if (value.isEmpty || value.length < 1) {
+                      if (value == null || value.isEmpty) {
                         return 'Preencha o valor KVA do gerador';
                       }
                     }),
@@ -307,10 +279,10 @@ class _CreateBudget extends State<CreateBudget> {
                     keyboardType: TextInputType.number,
                     controller: geradorValueText,
                     onChanged: (text) {
-                      this.budgetModel.generatorValue = text;
+                      budgetModel.generatorValue = text;
                     },
                     validator: (value) {
-                      if (value.isEmpty || value.length < 1) {
+                      if (value == null || value.isEmpty) {
                         return 'Preencha o preço do gerador';
                       }
                     }),
@@ -320,10 +292,10 @@ class _CreateBudget extends State<CreateBudget> {
                     keyboardType: TextInputType.number,
                     controller: geradorOperatorValueText,
                     onChanged: (text) {
-                      this.budgetModel.generatorOperatorValue = text;
+                      budgetModel.generatorOperatorValue = text;
                     },
                     validator: (value) {
-                      if (value.isEmpty || value.length < 1) {
+                      if (value == null || value.isEmpty) {
                         return 'Preencha o preço do operador';
                       }
                     }),
@@ -350,11 +322,11 @@ class _CreateBudget extends State<CreateBudget> {
                       keyboardType: TextInputType.number,
                       controller: eventoHoraAdicionalText,
                       onChanged: (text) {
-                        this.budgetModel.eventAdditionalhour = text;
+                        budgetModel.eventAdditionalhour = text;
                       },
                       validator: (value) {
                         if (selectedRadio == true &&
-                            (value.isEmpty || value.length < 1)) {
+                            (value == null || value.isEmpty)) {
                           return 'Preencha o valor da hora adicional';
                         }
                       }),
@@ -367,11 +339,11 @@ class _CreateBudget extends State<CreateBudget> {
                       keyboardType: TextInputType.number,
                       controller: eventoHoraUsoText,
                       onChanged: (text) {
-                        this.budgetModel.eventHoursUsed = text;
+                        budgetModel.eventHoursUsed = text;
                       },
                       validator: (value) {
                         if (selectedRadio == false &&
-                            (value.isEmpty || value.length < 1)) {
+                            (value == null || value.isEmpty)) {
                           return 'Preencha o valor de horas de uso';
                         }
                       }),
@@ -380,7 +352,7 @@ class _CreateBudget extends State<CreateBudget> {
                     decoration: const InputDecoration(labelText: "Observações"),
                     controller: generatorObservationText,
                     onChanged: (text) {
-                      this.budgetModel.generatorObservation = text;
+                      budgetModel.generatorObservation = text;
                     })
               ]))),
       Step(
@@ -389,17 +361,17 @@ class _CreateBudget extends State<CreateBudget> {
           state: _getState(3),
           content: Form(
               key: formKeys[3],
-              autovalidate: true,
+              autovalidateMode: AutovalidateMode.always,
               child: Column(children: <Widget>[
                 TextFormField(
                     decoration:
                         const InputDecoration(labelText: "Forma de pagamento"),
                     controller: formaPagamentoTextValue,
                     onChanged: (text) {
-                      this.budgetModel.paymentType = text;
+                      budgetModel.paymentType = text;
                     },
                     validator: (value) {
-                      if (value.isEmpty || value.length < 1) {
+                      if (value == null || value.isEmpty) {
                         return 'Preencha a forma de pagamento';
                       }
                     }),
@@ -412,7 +384,7 @@ class _CreateBudget extends State<CreateBudget> {
   void _changeRadioModeUse(dynamic value) {
     setState(() => {
           selectedRadio = value,
-          this.budgetModel.generatorIsStandBy = value ? 1 : 0
+          budgetModel.generatorIsStandBy = value ? 1 : 0
         });
   }
 
@@ -446,7 +418,7 @@ class _CreateBudget extends State<CreateBudget> {
   void _moveToNext() {
     setState(() {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
-      if (formKeys[_currentStep].currentState.validate()) {
+      if (formKeys[_currentStep].currentState?.validate() ?? false) {
         if (_currentStep + 1 == spr.length) {
           _saveBudget();
           completed = true;
@@ -464,78 +436,78 @@ class _CreateBudget extends State<CreateBudget> {
 
   void _saveBudget() async {
     try {
-      if (eventoDataInicio.text != null) {
+      if (eventoDataInicio.text.isNotEmpty) {
         var eventDateSplit = eventoDataInicio.text.split('/');
-        this.budgetModel.budgetCode =
+        budgetModel.budgetCode =
             eventDateSplit[2] + eventDateSplit[1] + eventDateSplit[0];
       }
-      this.budgetModel.id =
-          widget.budgetId != null ? int.parse(widget.budgetId) : null;
+      budgetModel.id =
+          widget.budgetId != null ? int.parse(widget.budgetId!) : null;
 
-      if (this.budgetModel.id != null) {
-        this.budgetModel.clientName = nomeClienteText.text != null
+      if (budgetModel.id != null) {
+        budgetModel.clientName = nomeClienteText.text.isNotEmpty
             ? nomeClienteText.text
-            : this.budgetModel.clientName;
-        this.budgetModel.clientCity = cidadeClienteText.text != null
+            : budgetModel.clientName;
+        budgetModel.clientCity = cidadeClienteText.text.isNotEmpty
             ? cidadeClienteText.text
-            : this.budgetModel.clientCity;
+            : budgetModel.clientCity;
 
-        this.budgetModel.clientEmail = emailClienteText.text != null
+        budgetModel.clientEmail = emailClienteText.text.isNotEmpty
             ? emailClienteText.text
-            : this.budgetModel.clientEmail;
+            : budgetModel.clientEmail;
 
-        this.budgetModel.clientPhone = telefoneClienteText.text != null
+        budgetModel.clientPhone = telefoneClienteText.text.isNotEmpty
             ? telefoneClienteText.text
-            : this.budgetModel.clientPhone;
+            : budgetModel.clientPhone;
 
-        this.budgetModel.generatorKva = geradorKvaText.text != null
+        budgetModel.generatorKva = geradorKvaText.text.isNotEmpty
             ? geradorKvaText.text
-            : this.budgetModel.generatorKva;
+            : budgetModel.generatorKva;
 
-        this.budgetModel.generatorValue = geradorValueText.text != null
+        budgetModel.generatorValue = geradorValueText.text.isNotEmpty
             ? geradorValueText.text
-            : this.budgetModel.generatorValue;
+            : budgetModel.generatorValue;
 
-        this.budgetModel.generatorOperatorValue =
-            geradorOperatorValueText.text != null
+        budgetModel.generatorOperatorValue =
+            geradorOperatorValueText.text.isNotEmpty
                 ? geradorOperatorValueText.text
-                : this.budgetModel.generatorOperatorValue;
+                : budgetModel.generatorOperatorValue;
 
-        this.budgetModel.generatorObservation =
-            generatorObservationText.text != null
+        budgetModel.generatorObservation =
+            generatorObservationText.text.isNotEmpty
                 ? generatorObservationText.text
-                : this.budgetModel.generatorObservation;
+                : budgetModel.generatorObservation;
 
-        this.budgetModel.eventLocal = eventoLocalText.text != null
+        budgetModel.eventLocal = eventoLocalText.text.isNotEmpty
             ? eventoLocalText.text
-            : this.budgetModel.eventLocal;
+            : budgetModel.eventLocal;
 
-        this.budgetModel.eventAdditionalhour =
-            eventoHoraAdicionalText.text != null
+        budgetModel.eventAdditionalhour =
+            eventoHoraAdicionalText.text.isNotEmpty
                 ? eventoHoraAdicionalText.text
-                : this.budgetModel.eventAdditionalhour;
+                : budgetModel.eventAdditionalhour;
 
-        this.budgetModel.eventHoursUsed = eventoHoraUsoText.text != null
+        budgetModel.eventHoursUsed = eventoHoraUsoText.text.isNotEmpty
             ? eventoHoraUsoText.text
-            : this.budgetModel.eventHoursUsed;
+            : budgetModel.eventHoursUsed;
 
-        this.budgetModel.eventDateStart = eventoDataInicio.text != null
+        budgetModel.eventDateStart = eventoDataInicio.text.isNotEmpty
             ? eventoDataInicio.text
-            : this.budgetModel.eventDateStart;
+            : budgetModel.eventDateStart;
 
-        this.budgetModel.paymentType = formaPagamentoTextValue.text != null
+        budgetModel.paymentType = formaPagamentoTextValue.text.isNotEmpty
             ? formaPagamentoTextValue.text
-            : this.budgetModel.paymentType;
+            : budgetModel.paymentType;
 
-        this.budgetModel.generatorIsStandBy = selectedRadio == true ? 1 : 0;
+        budgetModel.generatorIsStandBy = selectedRadio ? 1 : 0;
 
-        await updateBudget(this.budgetModel);
+        await updateBudget(budgetModel);
       } else {
-        this.budgetModel.generatorIsStandBy = selectedRadio == true ? 1 : 0;
-        await insertBudget(this.budgetModel);
+        budgetModel.generatorIsStandBy = selectedRadio ? 1 : 0;
+        await insertBudget(budgetModel);
       }
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 }

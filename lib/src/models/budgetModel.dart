@@ -1,32 +1,32 @@
 class BudgetModel {
-  int id;
-  String budgetCode;
-  String budgetTotalValue;
-  String budgetDate;
+  int? id;
+  String? budgetCode;
+  String? budgetTotalValue;
+  String? budgetDate;
 
   //client
-  String clientName;
-  String clientCity;
-  String clientPhone;
-  String clientEmail;
+  String? clientName;
+  String? clientCity;
+  String? clientPhone;
+  String? clientEmail;
 
   //generator
-  String generatorKva;
-  String generatorValue;
-  String generatorOperatorValue;
-  String generatorTotalValue;
-  int generatorIsStandBy;
-  String generatorObservation;
+  String? generatorKva;
+  String? generatorValue;
+  String? generatorOperatorValue;
+  String? generatorTotalValue;
+  int? generatorIsStandBy;
+  String? generatorObservation;
 
   //event
-  String eventLocal;
-  String eventAdditionalhour;
-  String eventHoursUsed;
-  String eventDateStart;
-  String eventDateEnd;
+  String? eventLocal;
+  String? eventAdditionalhour;
+  String? eventHoursUsed;
+  String? eventDateStart;
+  String? eventDateEnd;
 
   //payment
-  String paymentType;
+  String? paymentType;
 
   BudgetModel(
       {this.id,

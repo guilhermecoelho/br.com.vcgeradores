@@ -28,7 +28,7 @@ class _ListBudget extends State<ListBudget> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: new ListBudgetBody(),
+      home: ListBudgetBody(),
     );
   }
 }
@@ -36,29 +36,28 @@ class _ListBudget extends State<ListBudget> {
 class _ListBudgetBody extends State<ListBudgetBody> {
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: const Text('Orçamentos'),
       ),
       //drawer: SideBar(),
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(context,
-            new MaterialPageRoute(builder: (context) => CreateBudget(null))),
+            MaterialPageRoute(builder: (context) => CreateBudget(null))),
         child: Icon(Icons.add),
       ),
-      body: FutureBuilder<List>(
+      body: FutureBuilder<List<BudgetModel>>(
           future: listBudget(),
-          initialData: List(),
+          initialData: [],
           builder: (context, snapshot) {
-            return snapshot.hasData
-                ? new ListView.separated(
-                    itemCount: snapshot.data.length,
+            return snapshot.hasData && snapshot.data != null
+                ? ListView.separated(
+                    itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
+                      final budget = snapshot.data![index];
                       return Card(
                         child: ListTile(
-                          title: Text(snapshot.data[index].clientName +
-                              ' ' +
-                              snapshot.data[index].eventDateStart),
+                          title: Text('${budget.clientName ?? ''} ${budget.eventDateStart ?? ''}'),
                           trailing: Row(children: <Widget>[
                             PopupMenuButton(
                                 onSelected: (result) async {
@@ -68,15 +67,14 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                  CreateBudget(snapshot
-                                                      .data[index].id
-                                                      .toString())));
+                                                  CreateBudget(budget.id?.toString())));
                                       break;
                                     case 1:
-                                      BudgetModel budgetMode =
-                                          await getBudgetById(
-                                              snapshot.data[index].id);
-                                      printPdf(budgetMode);
+                                      BudgetModel? budgetMode =
+                                          await getBudgetById(budget.id!);
+                                      if (budgetMode != null) {
+                                        printPdf(budgetMode);
+                                      }
                                       break;
                                     case 2:
                                       showDialog(
@@ -84,16 +82,15 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                                           builder: (context) {
                                             return AlertDialog(
                                               title: Text(
-                                                  "Deseja realmente exlcuir?"),
+                                                  "Deseja realmente excluir?"),
                                               actions: <Widget>[
-                                                FlatButton(
+                                                TextButton(
                                                     onPressed: () =>
                                                         _deleteConfirm(
                                                             context,
-                                                            snapshot.data[index]
-                                                                .id),
+                                                            budget.id!),
                                                     child: Text('Sim')),
-                                                FlatButton(
+                                                TextButton(
                                                     onPressed: () =>
                                                         Navigator.of(context)
                                                             .pop(),
@@ -140,7 +137,7 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => CreateBudget(
-                                      snapshot.data[index].id.toString()))),
+                                      budget.id?.toString()))),
                         ),
                       );
                     },
@@ -155,7 +152,7 @@ class _ListBudgetBody extends State<ListBudgetBody> {
 
   void _deleteConfirm(BuildContext context, int id) {
     setState(() {
-      BudgetModel budget = new BudgetModel(id: id);
+      BudgetModel budget = BudgetModel(id: id);
       deleteBudget(budget);
       Navigator.of(context).pop();
     });
@@ -169,12 +166,12 @@ void _popupDialog(
       builder: (context) {
         return AlertDialog(
           title: Text(selectedButton.index.toString()),
-          content: Text(selectedItem.clientName),
+          content: Text(selectedItem.clientName ?? ''),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text('OK')),
-            FlatButton(
+            TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text('CANCEL')),
           ],
