@@ -5,6 +5,7 @@ import 'package:vc_geradores/src/connections/budgetDao.dart';
 import 'package:vc_geradores/src/views/budget/helperBudget.dart';
 
 import '../../models/budgetModel.dart';
+import '../../sidebar.dart';
 
 class CreateBudget extends StatefulWidget {
   final String? budgetId;
@@ -63,7 +64,7 @@ class _CreateBudget extends State<CreateBudget> {
                 onPressed: () => Navigator.pop(context, false),
               ),
             ),
-            //drawer: SideBar(),
+            drawer: SideBar(),
             body: Column(
               children: <Widget>[
                 !completed
@@ -178,18 +179,7 @@ class _CreateBudget extends State<CreateBudget> {
                       }
                       return null;
                     }),
-                TextFormField(
-                    decoration:
-                        const InputDecoration(labelText: "Local evento"),
-                    controller: eventoLocalText,
-                    onChanged: (text) {
-                      budgetModel.eventLocal = text.toString();
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Preencha o local do evento';
-                      }
-                    }),
+                LocaEvent(),
               ]))),
       Step(
           title: Text("Cliente"),
@@ -211,6 +201,7 @@ class _CreateBudget extends State<CreateBudget> {
                       if (value == null || value.isEmpty) {
                         return 'Preencha o nome do cliente';
                       }
+                      return null;
                     },
                   ),
                   TextFormField(
@@ -299,20 +290,21 @@ class _CreateBudget extends State<CreateBudget> {
                         return 'Preencha o preço do operador';
                       }
                     }),
-                Row(
-                  children: <Widget>[
-                    Radio(
-                      groupValue: selectedRadio,
-                      value: true,
-                      onChanged: (value) => _changeRadioModeUse(value),
-                    ),
-                    Text(" MODO STAND BY"),
-                    Radio(
-                        groupValue: selectedRadio,
+                RadioGroup<bool>(
+                  groupValue: selectedRadio,
+                  onChanged: (value) => _changeRadioModeUse(value),
+                  child: Column(
+                    children: [
+                      RadioListTile<bool>(
+                        title: const Text("MODO STAND BY"),
+                        value: true,
+                      ),
+                      RadioListTile<bool>(
+                        title: const Text("MODO USO"),
                         value: false,
-                        onChanged: (value) => _changeRadioModeUse(value)),
-                    Text("MODO USO"),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
                 Visibility(
                   visible: selectedRadio,
@@ -381,10 +373,25 @@ class _CreateBudget extends State<CreateBudget> {
     return spr;
   }
 
+  TextFormField LocaEvent() {
+    return TextFormField(
+                  decoration:
+                      const InputDecoration(labelText: "Local evento"),
+                  controller: eventoLocalText,
+                  onChanged: (text) {
+                    budgetModel.eventLocal = text.toString();
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Preencha o local do evento';
+                    }
+                  });
+  }
+
   void _changeRadioModeUse(dynamic value) {
-    setState(() => {
-          selectedRadio = value,
-          budgetModel.generatorIsStandBy = value ? 1 : 0
+    setState(() {
+          selectedRadio = value;
+          budgetModel.generatorIsStandBy = value ? 1 : 0;
         });
   }
 

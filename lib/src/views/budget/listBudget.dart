@@ -1,10 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:vc_geradores/src/connections/budgetDao.dart';
 import 'package:vc_geradores/src/models/budgetModel.dart';
 import 'package:vc_geradores/src/views/budget/createBudget.dart';
 
 import 'helperBudget.dart';
+import '../../sidebar.dart';
 
 enum PopUpItems { edit, print, delete, sendEmail }
 
@@ -40,7 +40,7 @@ class _ListBudgetBody extends State<ListBudgetBody> {
       appBar: AppBar(
         title: const Text('Orçamentos'),
       ),
-      //drawer: SideBar(),
+      drawer: SideBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(context,
             MaterialPageRoute(builder: (context) => CreateBudget(null))),
@@ -157,24 +157,4 @@ class _ListBudgetBody extends State<ListBudgetBody> {
       Navigator.of(context).pop();
     });
   }
-}
-
-void _popupDialog(
-    BuildContext context, dynamic selectedItem, dynamic selectedButton) {
-  showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(selectedButton.index.toString()),
-          content: Text(selectedItem.clientName ?? ''),
-          actions: <Widget>[
-            TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('OK')),
-            TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('CANCEL')),
-          ],
-        );
-      });
 }
