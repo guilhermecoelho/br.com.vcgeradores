@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:vc_geradores/src/connections/budgetDao.dart';
 import 'package:vc_geradores/src/models/budgetModel.dart';
 import 'package:vc_geradores/src/views/budget/createBudget.dart';
@@ -6,7 +10,7 @@ import 'package:vc_geradores/src/views/budget/createBudget.dart';
 import 'helperBudget.dart';
 import '../../sidebar.dart';
 
-enum PopUpItems { edit, print, delete, sendEmail }
+enum PopUpItems { edit, print, share, delete, sendEmail }
 
 class ListBudget extends StatefulWidget {
   @override
@@ -73,10 +77,19 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                                       BudgetModel? budgetMode =
                                           await getBudgetById(budget.id!);
                                       if (budgetMode != null) {
-                                        printPdf(budgetMode);
+                                        final pdf = await printPdf2(budgetMode);
+                                        preview(context, pdf);
                                       }
                                       break;
                                     case 2:
+                                     // SharePlus.instance.share(ShareParams(text:"testing share"));
+                                     FilePickerResult? result = await FilePicker.platform.pickFiles();
+                                      if(result != null){
+                                        File file = File(result.files.single.path!);
+                                        print(file.path);
+                                      }
+                                      break;
+                                    case 3:
                                       showDialog(
                                           context: context,
                                           builder: (context) {
@@ -117,6 +130,13 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                                           trailing: Icon(Icons.print),
                                         ),
                                       ),
+                                       const PopupMenuItem<PopUpItems>(
+                                        value: PopUpItems.share,
+                                        child: ListTile(
+                                          title: Text('Compartilhar'),
+                                          trailing: Icon(Icons.share),
+                                        ),
+                                      ),
                                       const PopupMenuItem<PopUpItems>(
                                         value: PopUpItems.delete,
                                         child: ListTile(
@@ -124,13 +144,6 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                                           trailing: Icon(Icons.delete),
                                         ),
                                       )
-                                      // const PopupMenuItem<PopUpItems>(
-                                      //   value: PopUpItems.sendEmail,
-                                      //   child: ListTile(
-                                      //     title: Text('Enviar'),
-                                      //     trailing: Icon(Icons.email),
-                                      //   ),
-                                      // ),
                                     ]),
                           ], mainAxisSize: MainAxisSize.min),
                           onTap: () => Navigator.push(
