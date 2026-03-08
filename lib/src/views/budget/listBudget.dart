@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:vc_geradores/src/connections/budgetDao.dart';
 import 'package:vc_geradores/src/models/budgetModel.dart';
 import 'package:vc_geradores/src/views/budget/createBudget.dart';
@@ -10,7 +9,7 @@ import 'package:vc_geradores/src/views/budget/createBudget.dart';
 import 'helperBudget.dart';
 import '../../sidebar.dart';
 
-enum PopUpItems { edit, print, share, delete, sendEmail }
+enum PopUpItems { edit, share, delete }
 
 class ListBudget extends StatefulWidget {
   @override
@@ -38,6 +37,20 @@ class _ListBudget extends State<ListBudget> {
 }
 
 class _ListBudgetBody extends State<ListBudgetBody> {
+  late Future<List<BudgetModel>> _budgetFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _budgetFuture = listBudget();
+  }
+
+  void _refreshList() {
+    setState(() {
+      _budgetFuture = listBudget();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,15 +60,16 @@ class _ListBudgetBody extends State<ListBudgetBody> {
       drawer: SideBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => CreateBudget(null))),
+            MaterialPageRoute(builder: (context) => CreateBudget(null))).then((_) => _refreshList()),
         child: Icon(Icons.add),
       ),
       body: FutureBuilder<List<BudgetModel>>(
-          future: listBudget(),
+          future: _budgetFuture,
           initialData: [],
-          builder: (context, snapshot) {
+          builder: (contesext, snapshot) {
             return snapshot.hasData && snapshot.data != null
                 ? ListView.separated(
+                    padding: const EdgeInsets.only(bottom: 80),
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
                       final budget = snapshot.data![index];
@@ -71,25 +85,24 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                  CreateBudget(budget.id?.toString())));
+                                                  CreateBudget(budget.id?.toString()))).then((_) => _refreshList());
                                       break;
                                     case 1:
                                       BudgetModel? budgetMode =
                                           await getBudgetById(budget.id!);
                                       if (budgetMode != null) {
-                                        final pdf = await printPdf2(budgetMode);
+                                        final pdf = await printPdf(budgetMode);
                                         preview(context, pdf);
                                       }
                                       break;
+                                    // case 2:
+                                    //  FilePickerResult? result = await FilePicker.platform.pickFiles();
+                                    //   if(result != null){
+                                    //     File file = File(result.files.single.path!);
+                                    //     print(file.path);
+                                    //   }
+                                    //   break;
                                     case 2:
-                                     // SharePlus.instance.share(ShareParams(text:"testing share"));
-                                     FilePickerResult? result = await FilePicker.platform.pickFiles();
-                                      if(result != null){
-                                        File file = File(result.files.single.path!);
-                                        print(file.path);
-                                      }
-                                      break;
-                                    case 3:
                                       showDialog(
                                           context: context,
                                           builder: (context) {
@@ -123,13 +136,13 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                                             title: Text('Editar'),
                                             trailing: Icon(Icons.edit),
                                           )),
-                                      const PopupMenuItem<PopUpItems>(
-                                        value: PopUpItems.print,
-                                        child: ListTile(
-                                          title: Text('Imprimir'),
-                                          trailing: Icon(Icons.print),
-                                        ),
-                                      ),
+                                      // const PopupMenuItem<PopUpItems>(
+                                      //   value: PopUpItems.print,
+                                      //   child: ListTile(
+                                      //     title: Text('Imprimir'),
+                                      //     trailing: Icon(Icons.print),
+                                      //   ),
+                                      // ),
                                        const PopupMenuItem<PopUpItems>(
                                         value: PopUpItems.share,
                                         child: ListTile(
@@ -150,7 +163,7 @@ class _ListBudgetBody extends State<ListBudgetBody> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => CreateBudget(
-                                      budget.id?.toString()))),
+                                      budget.id?.toString()))).then((_) => _refreshList()),
                         ),
                       );
                     },
@@ -163,11 +176,9 @@ class _ListBudgetBody extends State<ListBudgetBody> {
     );
   }
 
-  void _deleteConfirm(BuildContext context, int id) {
-    setState(() {
-      BudgetModel budget = BudgetModel(id: id);
-      deleteBudget(budget);
-      Navigator.of(context).pop();
-    });
+  void _deleteConfirm(BuildContext context, int id) async {
+    await deleteBudget(BudgetModel(id: id));
+    Navigator.of(context).pop();
+    _refreshList();
   }
 }

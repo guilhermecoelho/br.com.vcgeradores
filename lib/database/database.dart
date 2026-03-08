@@ -49,6 +49,28 @@ initDB() async {
         "eventDateEnd TEXT,"
         "paymentType TEXT"
         ")");
+
+    // await db.insert('Budget', {
+    //   'budgetCode': 'ORC-001',
+    //   'budgetDate': '01/03/2026',
+    //   'budgetTotalValue': '2500,00',
+    //   'clientName': 'João Silva',
+    //   'clientCity': 'São Paulo',
+    //   'clientPhone': '(11) 99999-0001',
+    //   'clientEmail': 'joao.silva@email.com',
+    //   'generatorKva': '75',
+    //   'generatorValue': '2000,00',
+    //   'generatorOperatorValue': '300,00',
+    //   'generatorIsStandBy': 0,
+    //   'generatorObservation': 'Gerador com tanque cheio',
+    //   'eventLocal': 'Espaço Verde Eventos',
+    //   'eventAdditionalhour': '150,00',
+    //   'eventHoursUsed': '8',
+    //   'eventDateStart': '15/03/2026',
+    //   'eventDateEnd': '15/03/2026',
+    //   'paymentType': 'PIX',
+    // });
+
   }, onUpgrade: (Database db, int oldVersion, int newVersion) async {
     if (newVersion == 2) {
       await db.execute("ALTER TABLE Budget ADD COLUMN eventHoursUsed TEXT;");

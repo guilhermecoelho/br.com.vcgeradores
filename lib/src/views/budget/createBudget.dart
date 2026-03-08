@@ -108,7 +108,7 @@ class _CreateBudget extends State<CreateBudget> {
                         content: Text('Deseja imprimir agora?'),
                         actions: <Widget>[
                           TextButton(
-                              onPressed: () => printPdf(budgetModel),
+                              onPressed: () => {CallPreview(context,budgetModel)},
                               child: Text('Imprimir')),
                           TextButton(
                               onPressed: () => Navigator.of(context).pop(),
@@ -515,6 +515,9 @@ class _CreateBudget extends State<CreateBudget> {
       }
     } catch (e) {
       rethrow;
+    }
+    finally{
+     
     }
   }
 }

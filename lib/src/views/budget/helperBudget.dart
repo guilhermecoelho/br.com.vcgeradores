@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -16,21 +15,49 @@ const PdfColor _yellow = PdfColor.fromInt(0xFFFFFF00);
 const PdfColor _lightYellow = PdfColor.fromInt(0xFFFFF9C4);
 const PdfColor _lightGreen = PdfColor.fromInt(0xFFE8F5E9);
 const PdfColor _green = PdfColor.fromInt(0xFF388E3C);
-const PdfColor _white = PdfColors.white;
 
-const logo = "logo";
 
-Future<void> printPdf(BudgetModel budgetModel) async {
-  final String htmlContent = await _buildHTML(budgetModel);
-
-  await Printing.layoutPdf(
-    onLayout: (format) => Printing.convertHtml(
-      html: htmlContent,
-      format: format,
-    ),
-  );
+Future<void> CallPreview(BuildContext context, BudgetModel budgetModel) async {
+  final pdf = await printPdf(budgetModel);
+  preview(context, pdf);
 }
-pw.Widget _header(BudgetModel d) {
+
+Future<pw.Document> printPdf(BudgetModel budgetModel) async {
+  final pdf = pw.Document();
+  final logoImage = await imageFromAssetBundle('assets/html/images/logo.jpg');
+
+  pdf.addPage(
+    pw.Page(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.all(24),
+      build: (context) => pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+          children: [
+            _header(budgetModel, logoImage),
+            pw.SizedBox(height: 6),
+            _clientSection(budgetModel),
+            pw.SizedBox(height: 6),
+             _equipmentSection(budgetModel),
+            pw.SizedBox(height: 4),
+            _totalRow(budgetModel),
+             pw.SizedBox(height: 6),
+            _rentalIndexSection(budgetModel),
+             pw.SizedBox(height: 6),
+            _inclusosSection(),
+             pw.SizedBox(height: 6),
+            _paymentRow(budgetModel),
+            pw.SizedBox(height: 8),
+            _validityBanner(budgetModel),
+             pw.SizedBox(height: 20),
+            _footerRow(budgetModel)
+          ]
+      )
+    )
+  );
+    return pdf;
+}
+
+pw.Widget _header(BudgetModel d, pw.ImageProvider logoImage) {
     return pw.Container(
       decoration: pw.BoxDecoration(
         border: pw.Border.all(color: _darkNavy, width: 2),
@@ -47,45 +74,8 @@ pw.Widget _header(BudgetModel d) {
               ),
             ),
             padding: const pw.EdgeInsets.all(8),
-            child: logo != null
-                ? pw.Center(
-                    //child: pw.Image(logo, fit: pw.BoxFit.contain),
-                    child: pw.Text(logo)
-                  )
-                : pw.Center(
-                    child: pw.Column(
-                      mainAxisAlignment: pw.MainAxisAlignment.center,
-                      children: [
-                        // Placeholder icon built from basic shapes
-                        pw.Container(
-                          width: 48,
-                          height: 48,
-                          decoration: pw.BoxDecoration(
-                            shape: pw.BoxShape.circle,
-                            border: pw.Border.all(color: _darkNavy, width: 2),
-                          ),
-                          child: pw.Center(
-                            child: pw.Text(
-                              'VC',
-                              style: pw.TextStyle(
-                                fontSize: 16,
-                                fontWeight: pw.FontWeight.bold,
-                                color: _darkNavy,
-                              ),
-                            ),
-                          ),
-                        ),
-                        pw.SizedBox(height: 4),
-                        pw.Text(
-                          'LOGO',
-                          style: pw.TextStyle(
-                            fontSize: 7,
-                            color: _mediumGray,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ],
-                    ),
+            child: pw.Center(
+                    child: pw.Image(logoImage, fit: pw.BoxFit.contain),
                   ),
           ),
           // Company info
@@ -249,8 +239,7 @@ pw.Widget _totalRow(BudgetModel d) {
           ),
         ),
         pw.SizedBox(width: 12),
-        pw.Text(
-          d.generatorTotalValue.toString(),
+        pw.Text("R\$ " +_totalValue(d.generatorOperatorValue ?? '0', d.generatorValue ?? '0').toString(),
           style: pw.TextStyle(
             fontSize: 18,
             fontWeight: pw.FontWeight.bold,
@@ -287,7 +276,7 @@ pw.Widget _rentalIndexSection(BudgetModel d) {
               pw.SizedBox(width: 12),
               pw.Text('Data Final ', style: pw.TextStyle(fontSize: 9, color: _mediumGray)),
               pw.Text(
-                d.eventDateEnd.toString(),
+                '',//d.eventDateEnd.toString(),
                 style: pw.TextStyle(
                   fontSize: 11,
                   fontWeight: pw.FontWeight.bold,
@@ -296,13 +285,19 @@ pw.Widget _rentalIndexSection(BudgetModel d) {
               ),
             ],
           ),
-          if (d.eventHoursUsed == null) ...[
+           if (d.generatorIsStandBy == 1) ...[
+            pw.SizedBox(height: 4),
+            _infoRow('Valor Hora Adicional', d.eventAdditionalhour.toString()),
+              pw.SizedBox(height: 4),
+            _infoRow('Hor Adicional', 'Será considerado hora adicional a partir do momento em que o gerador será acionado pelo operador por falta de energia elétrica externa (CPFL)'),
+          ],
+          if (d.eventHoursUsed == 1) ...[
             pw.SizedBox(height: 4),
             _infoRow('Hora Adicional', d.eventHoursUsed.toString()),
           ],
-          if (d.generatorObservation == null) ...[
+          if (d.generatorObservation != null) ...[
             pw.SizedBox(height: 4),
-            _infoRow('Observações', d.generatorObservation.toString()),
+            _infoRow('Observações', d.generatorObservation!.toString()),
           ],
         ],
       ),
@@ -336,7 +331,7 @@ pw.Widget _validityBanner(BudgetModel d) {
       ),
       padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       child: pw.Text(
-        'ORÇAMENTO VÁLIDO ATÉ ${d.budgetDate}',
+        'ORÇAMENTO VÁLIDO ATÉ ${_dateLimit()}',
         textAlign: pw.TextAlign.center,
         style: pw.TextStyle(
           fontSize: 10,
@@ -549,39 +544,6 @@ pw.TableRow _equipmentTableRow({
     );
   }
 
-Future<pw.Document> printPdf2(BudgetModel budgetModel) async {
-  final pdf = pw.Document();
-  
-  pdf.addPage(
-    pw.Page(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.all(24),
-      build: (context) => pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-          children: [
-            _header(budgetModel),
-            pw.SizedBox(height: 6),
-            _clientSection(budgetModel),
-            pw.SizedBox(height: 6),
-             _equipmentSection(budgetModel),
-            pw.SizedBox(height: 4),
-            _totalRow(budgetModel),
-             pw.SizedBox(height: 6),
-            _rentalIndexSection(budgetModel),
-             pw.SizedBox(height: 6),
-            _inclusosSection(),
-             pw.SizedBox(height: 6),
-            _paymentRow(budgetModel),
-            pw.SizedBox(height: 8),
-            _validityBanner(budgetModel),
-             pw.SizedBox(height: 8),
-            _footerRow(budgetModel)
-          ]
-      )
-    )
-  );
-    return pdf;
-}
 
 Future<void> preview(BuildContext context, pw.Document pdf) async {
   showDialog(
@@ -606,64 +568,10 @@ Future<void> preview(BuildContext context, pw.Document pdf) async {
   );
 }
 
-
-Future<String> _buildHTML(BudgetModel budgetModel) async {
-  try {
-    String file = budgetModel.generatorIsStandBy == 1
-        ? await rootBundle.loadString('assets/html/budgetStandBy.html')
-        : await rootBundle.loadString('assets/html/budgetModeUse.html');
-
-    file = file.replaceFirst('orcamentoText', budgetModel.budgetCode ?? '');
-    file = file.replaceFirst('nomeClienteText', budgetModel.clientName ?? '');
-    file = file.replaceFirst('cidadeClienteText', budgetModel.clientCity ?? '');
-    file = file.replaceFirst('telefoneClienteText', budgetModel.clientPhone ?? '');
-    file = file.replaceFirst('emailClienteText', budgetModel.clientEmail ?? '');
-
-    // descrição gerador
-    file = file.replaceFirst('geradorModoUsoText',
-        budgetModel.generatorIsStandBy == 1 ? "MODO STANDY BY" : "MODO USO");
-    file = file.replaceFirst('geradorKvaText', budgetModel.generatorKva ?? '');
-    file = file.replaceFirst('geradorValueText', budgetModel.generatorValue ?? '');
-    file = file.replaceFirst(
-        'geradorOperatorValueText', budgetModel.generatorOperatorValue ?? '');
-    file = file.replaceFirst(
-        'geradorTotalValue',
-        _totalValue(
-                budgetModel.generatorOperatorValue ?? '0', budgetModel.generatorValue ?? '0')
-            .toString());
-
-    file = file.replaceFirst(
-        'generatorObservationText',
-        budgetModel.generatorObservation ?? ' ');
-
-    //dados evento
-    file = file.replaceFirst('eventoLocalText', budgetModel.eventLocal ?? '');
-    if (budgetModel.generatorIsStandBy == 1) {
-      file = file.replaceFirst(
-          'eventoHoraAdicionalText', budgetModel.eventAdditionalhour ?? '');
-    }
-    file = file.replaceFirst('eventoDataInicio', budgetModel.eventDateStart ?? '');
-
-    if (budgetModel.generatorIsStandBy == 0) {
-      file = file.replaceFirst('eventoHoraUsoText', budgetModel.eventHoursUsed ?? '');
-    }
-
-    //forma pagamento
-    file = file.replaceFirst('formaPagamentoTextValue', budgetModel.paymentType ?? '');
-
-    // validade orçamento
-    file = file.replaceFirst(
-        'dataLimiteOrcamento',
-        DateFormat.yMMMMd("pt_BR")
+String _dateLimit(){
+  return DateFormat.yMMMMd("pt_BR")
             .format(DateTime.now().add(Duration(days: 30)))
-            .toUpperCase());
-
-    file = file.replaceFirst(
-        'dataOrcamento', DateFormat.yMMMMd("pt_BR").format(DateTime.now()));
-    return file;
-  } catch (e) {
-    return 'error';
-  }
+            .toUpperCase();
 }
 
 double _totalValue(String firstValue, String secondValue) {
