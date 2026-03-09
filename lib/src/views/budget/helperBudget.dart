@@ -67,15 +67,16 @@ pw.Widget _header(BudgetModel d, pw.ImageProvider logoImage) {
         children: [
           //logo
          pw.Container(
-            width: 80,
+            width: 110,
             decoration: const pw.BoxDecoration(
               border: pw.Border(
                 right: pw.BorderSide(color: _darkNavy, width: 1),
               ),
             ),
-            padding: const pw.EdgeInsets.all(8),
+            padding: const pw.EdgeInsets.all(10),
             child: pw.Center(
                     child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+                    
                   ),
           ),
           // Company info
@@ -92,7 +93,7 @@ pw.Widget _header(BudgetModel d, pw.ImageProvider logoImage) {
                 crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
                   pw.Text(
-                    'VCGERADORES E LOCAÇÕES',
+                    'VC GERADORES E LOCAÇÕES',
                     style: pw.TextStyle(
                       fontSize: 12,
                       fontWeight: pw.FontWeight.bold,
@@ -104,8 +105,7 @@ pw.Widget _header(BudgetModel d, pw.ImageProvider logoImage) {
                   pw.Text(
                     'Rua Sibipiruna, 94, Cond. Mirante Lenheiro\n'
                     'Cidade de Valinhos/ SP - CEP 13.272-162\n'
-                    'Telefone (19)3327-4299 - 97407-9690\n'
-                    'CNPJ 19.731.581/0001-60',
+                    'Telefone (19)3327-4299 - 97407-9690',
                     style: pw.TextStyle(fontSize: 8, color: _mediumGray, lineSpacing: 2),
                   ),
                 ],
@@ -349,7 +349,7 @@ pw.Widget _footerRow(BudgetModel d) {
       crossAxisAlignment: pw.CrossAxisAlignment.end,
       children: [
         pw.Text(
-          'Valinhos, ${d.budgetDate}',
+          'Valinhos, ${_dateCurrent()}',
           style: pw.TextStyle(fontSize: 9, color: _mediumGray),
         ),
         pw.Spacer(),
@@ -571,6 +571,12 @@ Future<void> preview(BuildContext context, pw.Document pdf) async {
 String _dateLimit(){
   return DateFormat.yMMMMd("pt_BR")
             .format(DateTime.now().add(Duration(days: 30)))
+            .toUpperCase();
+}
+
+String _dateCurrent(){
+  return DateFormat.yMMMMd("pt_BR")
+            .format(DateTime.now())
             .toUpperCase();
 }
 
