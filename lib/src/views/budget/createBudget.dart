@@ -132,7 +132,7 @@ class _CreateBudget extends State<CreateBudget> {
         geradorKvaText.text = budgetModel.generatorKva ?? oldbudgetModel.generatorKva ?? '';
         geradorValueText.text = budgetModel.generatorValue ?? oldbudgetModel.generatorValue ?? '';
         geradorOperatorValueText.text = budgetModel.generatorOperatorValue ?? oldbudgetModel.generatorOperatorValue ?? '';
-        geradorOperatorValueText.text = budgetModel.generatorCableValue ?? oldbudgetModel.generatorCableValue ?? '';
+        geradorCableText.text = budgetModel.generatorCableValue ?? oldbudgetModel.generatorCableValue ?? '';
         generatorObservationText.text = budgetModel.generatorObservation ?? oldbudgetModel.generatorObservation ?? '';
         eventoLocalText.text = budgetModel.eventLocal ?? oldbudgetModel.eventLocal ?? '';
         eventoHoraAdicionalText.text = budgetModel.eventAdditionalhour ?? oldbudgetModel.eventAdditionalhour ?? '';
@@ -217,6 +217,7 @@ class _CreateBudget extends State<CreateBudget> {
                         if (value == null || value.isEmpty) {
                           return 'Preencha a cidade do cliente';
                         }
+                        return null;
                       }),
                   TextFormField(
                       decoration:
@@ -230,6 +231,7 @@ class _CreateBudget extends State<CreateBudget> {
                         if (value == null || value.isEmpty) {
                           return 'Preencha o telefone do cliente';
                         }
+                        return null;
                       }),
                   TextFormField(
                       decoration:
@@ -243,6 +245,7 @@ class _CreateBudget extends State<CreateBudget> {
                         if (value == null || value.isEmpty) {
                           return 'Preencha o email do cliente';
                         }
+                        return null;
                       }),
                 ],
               ))),
@@ -265,6 +268,7 @@ class _CreateBudget extends State<CreateBudget> {
                       if (value == null || value.isEmpty) {
                         return 'Preencha o valor KVA do gerador';
                       }
+                      return null;
                     }),
                 TextFormField(
                     decoration:
@@ -278,6 +282,7 @@ class _CreateBudget extends State<CreateBudget> {
                       if (value == null || value.isEmpty) {
                         return 'Preencha o preço do gerador';
                       }
+                      return null;
                     }),
                 TextFormField(
                     decoration:
@@ -291,6 +296,7 @@ class _CreateBudget extends State<CreateBudget> {
                       if (value == null || value.isEmpty) {
                         return 'Preencha o preço do operador';
                       }
+                      return null;
                     }),
                 TextFormField(
                     decoration: const InputDecoration(labelText: "Conjunto Cabos"),
@@ -303,6 +309,7 @@ class _CreateBudget extends State<CreateBudget> {
                       if (value == null || value.isEmpty) {
                         return 'Preencha o valor Conjunto Cabos';
                       }
+                      return null;
                     }),
                 RadioGroup<bool>(
                   groupValue: selectedRadio,
@@ -335,6 +342,7 @@ class _CreateBudget extends State<CreateBudget> {
                             (value == null || value.isEmpty)) {
                           return 'Preencha o valor da hora adicional';
                         }
+                        return null;
                       }),
                 ),
                 Visibility(
@@ -352,6 +360,7 @@ class _CreateBudget extends State<CreateBudget> {
                             (value == null || value.isEmpty)) {
                           return 'Preencha o valor de horas de uso';
                         }
+                        return null;
                       }),
                 ),
                 TextFormField(
@@ -380,6 +389,7 @@ class _CreateBudget extends State<CreateBudget> {
                       if (value == null || value.isEmpty) {
                         return 'Preencha a forma de pagamento';
                       }
+                      return null;
                     }),
               ])))
     ];
@@ -399,6 +409,7 @@ class _CreateBudget extends State<CreateBudget> {
                     if (value == null || value.isEmpty) {
                       return 'Preencha o local do evento';
                     }
+                    return null;
                   });
   }
 
@@ -496,7 +507,7 @@ class _CreateBudget extends State<CreateBudget> {
 
         budgetModel.generatorCableValue =
             geradorOperatorValueText.text.isNotEmpty
-                ? geradorOperatorValueText.text
+                ? geradorCableText.text
                 : budgetModel.generatorCableValue;
 
         budgetModel.generatorObservation =
