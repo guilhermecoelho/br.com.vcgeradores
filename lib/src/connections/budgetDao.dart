@@ -63,6 +63,7 @@ BudgetModel _populateBudgetModel(Map<String, dynamic> map) {
       generatorOperatorValue: map['generatorOperatorValue'],
       generatorIsStandBy: map['generatorIsStandBy'],
       generatorObservation: map['generatorObservation'],
+      generatorCableValue: map['generatorCableValue'],
       eventLocal: map['eventLocal'],
       eventAdditionalhour: map['eventAdditionalhour'],
       eventHoursUsed: map['eventHoursUsed'],

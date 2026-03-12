@@ -12,7 +12,7 @@ class DBProvider {
 
 Database? _database;
 
-int _version = 3;
+int _version = 4;
 
 Future<Database> get database async {
   if (_database != null) return _database!;
@@ -40,6 +40,7 @@ initDB() async {
         "generatorValue TEXT,"
         "generatorIsStandBy INTEGER,"
         "generatorOperatorValue TEXT,"
+        "generatorCableValue TEXT,"
         "generatorTotalValue TEXT,"
         "generatorObservation TEXT,"
         "eventLocal TEXT,"
@@ -81,6 +82,10 @@ initDB() async {
     if (newVersion == 3) {
       await db
           .execute("ALTER TABLE Budget ADD COLUMN generatorObservation TEXT;");
+    }
+     if (newVersion == 4) {
+      await db
+          .execute("ALTER TABLE Budget ADD COLUMN generatorOperatorValue TEXT;");
     }
   });
 }

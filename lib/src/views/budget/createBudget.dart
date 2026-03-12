@@ -35,6 +35,7 @@ class _CreateBudget extends State<CreateBudget> {
   final geradorKvaText = TextEditingController();
   final geradorValueText = TextEditingController();
   final geradorOperatorValueText = TextEditingController();
+  final geradorCableText = TextEditingController();
   final generatorObservationText = TextEditingController();
 
   //dados evento
@@ -131,6 +132,7 @@ class _CreateBudget extends State<CreateBudget> {
         geradorKvaText.text = budgetModel.generatorKva ?? oldbudgetModel.generatorKva ?? '';
         geradorValueText.text = budgetModel.generatorValue ?? oldbudgetModel.generatorValue ?? '';
         geradorOperatorValueText.text = budgetModel.generatorOperatorValue ?? oldbudgetModel.generatorOperatorValue ?? '';
+        geradorOperatorValueText.text = budgetModel.generatorCableValue ?? oldbudgetModel.generatorCableValue ?? '';
         generatorObservationText.text = budgetModel.generatorObservation ?? oldbudgetModel.generatorObservation ?? '';
         eventoLocalText.text = budgetModel.eventLocal ?? oldbudgetModel.eventLocal ?? '';
         eventoHoraAdicionalText.text = budgetModel.eventAdditionalhour ?? oldbudgetModel.eventAdditionalhour ?? '';
@@ -288,6 +290,18 @@ class _CreateBudget extends State<CreateBudget> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Preencha o preço do operador';
+                      }
+                    }),
+                TextFormField(
+                    decoration: const InputDecoration(labelText: "Conjunto Cabos"),
+                    keyboardType: TextInputType.number,
+                    controller: geradorCableText,
+                    onChanged: (text) {
+                      budgetModel.generatorCableValue = text;
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Preencha o valor Conjunto Cabos';
                       }
                     }),
                 RadioGroup<bool>(
@@ -479,6 +493,11 @@ class _CreateBudget extends State<CreateBudget> {
             geradorOperatorValueText.text.isNotEmpty
                 ? geradorOperatorValueText.text
                 : budgetModel.generatorOperatorValue;
+
+        budgetModel.generatorCableValue =
+            geradorOperatorValueText.text.isNotEmpty
+                ? geradorOperatorValueText.text
+                : budgetModel.generatorCableValue;
 
         budgetModel.generatorObservation =
             generatorObservationText.text.isNotEmpty

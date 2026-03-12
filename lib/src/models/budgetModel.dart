@@ -14,6 +14,7 @@ class BudgetModel {
   String? generatorKva;
   String? generatorValue;
   String? generatorOperatorValue;
+  String? generatorCableValue;
   String? generatorTotalValue;
   int? generatorIsStandBy;
   String? generatorObservation;
@@ -40,6 +41,7 @@ class BudgetModel {
       this.generatorKva,
       this.generatorValue,
       this.generatorOperatorValue,
+      this.generatorCableValue,
       this.generatorTotalValue,
       this.generatorIsStandBy,
       this.generatorObservation,
@@ -63,6 +65,7 @@ class BudgetModel {
       'generatorKva': generatorKva,
       'generatorValue': generatorValue,
       'generatorOperatorValue': generatorOperatorValue,
+      'generatorCableValue': generatorCableValue,
       'generatorTotalValue': generatorTotalValue,
       'generatorIsStandBy': generatorIsStandBy,
       'generatorObservation':generatorObservation,

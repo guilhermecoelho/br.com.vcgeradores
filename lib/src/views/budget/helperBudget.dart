@@ -182,7 +182,7 @@ pw.Widget _equipmentSection(BudgetModel d) {
               _tableHeaderCell('Qtd'),
               _tableHeaderCell('Descrição'),
               _tableHeaderCell('Especif.'),
-              _tableHeaderCell('Modo Uso', bgColor: _yellow),
+              _tableHeaderCell('Modo', bgColor: _yellow),
               _tableHeaderCell('Valor Total'),
             ],
           ),
@@ -192,7 +192,7 @@ pw.Widget _equipmentSection(BudgetModel d) {
             description: 'GERADOR CARENADO',
             spec: '${d.generatorKva} KVA',
             modeUso: d.generatorIsStandBy.toString(),
-            value: d.generatorValue!,
+            value: _currencyFormat(d.generatorValue!),
             modeHighlighted: true,
           ),
           // Operator
@@ -201,13 +201,13 @@ pw.Widget _equipmentSection(BudgetModel d) {
             description: 'OPERADOR PLANTÃO',
             spec: '',
             modeUso: '',
-            value: d.generatorOperatorValue!,
+            value: _currencyFormat(d.generatorOperatorValue!),
           ),
           // Cables
           _equipmentTableRow(
             qty: '1',
             description: 'CONJ CABOS TRIFÁSICOS / INTERMEDIÁRIA',
-            spec: '70 MM',
+            spec: '${d.generatorCableValue} MM',
             modeUso: '',
             value: 'CORTESIA',
             valueGreen: true,
@@ -239,7 +239,7 @@ pw.Widget _totalRow(BudgetModel d) {
           ),
         ),
         pw.SizedBox(width: 12),
-        pw.Text("R\$ " +_totalValue(d.generatorOperatorValue ?? '0', d.generatorValue ?? '0').toString(),
+        pw.Text(_totalValue(d.generatorOperatorValue ?? '0', d.generatorValue ?? '0'),
           style: pw.TextStyle(
             fontSize: 18,
             fontWeight: pw.FontWeight.bold,
@@ -287,9 +287,9 @@ pw.Widget _rentalIndexSection(BudgetModel d) {
           ),
            if (d.generatorIsStandBy == 1) ...[
             pw.SizedBox(height: 4),
-            _infoRow('Valor Hora Adicional', d.eventAdditionalhour.toString()),
+            _infoRow('Valor Hora Adicional', _currencyFormat(d.eventAdditionalhour!)),
               pw.SizedBox(height: 4),
-            _infoRow('Hor Adicional', 'Será considerado hora adicional a partir do momento em que o gerador será acionado pelo operador por falta de energia elétrica externa (CPFL)'),
+            _infoRow('Hora Adicional', 'Será considerado hora adicional a partir do momento em que o gerador será acionado pelo operador por falta de energia elétrica externa (CPFL)'),
           ],
           if (d.eventHoursUsed == 1) ...[
             pw.SizedBox(height: 4),
@@ -443,7 +443,7 @@ pw.Widget _inclusosSection() {
       ('Combustível', true),
       ('Entrega', true),
       ('Retirada', true),
-      ('Transporte / pessoal / despesas fiscais', false),
+      ('Transporte / pessoal / despesas fiscais', true),
     ];
 
     return _section(
@@ -459,7 +459,7 @@ pw.Widget _inclusosSection() {
             decoration: const pw.BoxDecoration(color: _lightGray),
             children: [
               _tableHeaderCell('Item'),
-              _tableHeaderCell('Incluído'),
+              _tableHeaderCell('Incluso'),
             ],
           ),
           for (final item in items)
@@ -580,10 +580,18 @@ String _dateCurrent(){
             .toUpperCase();
 }
 
-double _totalValue(String firstValue, String secondValue) {
+String _totalValue(String firstValue, String secondValue) {
   var first = double.tryParse(firstValue) ?? 0.0;
   var second = double.tryParse(secondValue) ?? 0.0;
+  var total = first + second;
 
-  return (first + second);
+  return _currencyFormat(total.toString());
+}
+
+String _currencyFormat(String value){
+
+  var valueDouble = double.tryParse(value) ?? 0.0;
+  var valueFormated = new NumberFormat.currency(locale: "pt_BR", symbol: "R\$");
+  return valueFormated.format(valueDouble);
 }
 
